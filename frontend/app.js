@@ -1,21 +1,29 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const response = await fetch('http://localhost:3000/restaurants');
-    const restaurants = await response.json();
+const supabaseUrl = 'https://lvvihdrpnrhghlnejyzp.supabase.co';
+const supabaseKey = 'tu_clave_de_supabase';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const container = document.getElementById('restaurants');
-    restaurants.forEach(restaurant => {
-        const div = document.createElement('div');
-        div.className = 'restaurant';
-        div.innerHTML = `
-            <h2>${restaurant.name}</h2>
-            <p>${restaurant.address}</p>
-            <button onclick="reservar(${restaurant.id})">Reservar Mesa</button>
-        `;
-        container.appendChild(div);
-    });
-});
+async function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-async function reservar(restaurantId) {
-    // Lógica para reservar una mesa
-    alert(`Reservando en el restaurante con ID: ${restaurantId}`);
+    const { user, error } = await supabase.auth.signIn({ email, password });
+
+    if (error) {
+        alert(error.message);
+    } else {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    }
 }
+
+// Verifica si el usuario ya ha iniciado sesión al cargar la página
+async function checkSession() {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (data.session) {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+    }
+}
+
+checkSession();

@@ -10,5 +10,16 @@
     <h1>Restaurantes Disponibles</h1>
     <div id="restaurants"></div>
     <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div id="login-form">
+        <h2>Iniciar sesión</h2>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button onclick="login()">Iniciar sesión</button>
+    </div>
+    <div id="content" style="display: none;">
+        <h2>Bienvenido</h2>
+        <p>Has iniciado sesión correctamente.</p>
+    </div>
 </body>
 </html>
