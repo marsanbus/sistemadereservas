@@ -30,6 +30,19 @@ async function login() {
     }
 }
 
+async function logout() {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        console.error('Error al cerrar sesión:', error); // Depuración
+        alert(error.message);
+    } else {
+        console.log('Sesión cerrada correctamente'); // Depuración
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('content').style.display = 'none';
+    }
+}
+
 // Verifica si el usuario ya ha iniciado sesión al cargar la página
 async function checkSession() {
     const { data, error } = await supabaseClient.auth.getSession();
@@ -37,6 +50,9 @@ async function checkSession() {
     if (data.session) {
         document.getElementById('login-form').style.display = 'none';
         document.getElementById('content').style.display = 'block';
+    } else {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('content').style.display = 'none';
     }
 }
 
