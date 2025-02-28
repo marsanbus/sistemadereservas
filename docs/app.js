@@ -18,13 +18,13 @@ async function login() {
 
     console.log('Intentando iniciar sesión con:', email, password); // Depuración
 
-    const { user, error } = await supabaseClient.auth.signIn({ email, password });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if (error) {
         console.error('Error al iniciar sesión:', error); // Depuración
         alert(error.message);
     } else {
-        console.log('Usuario logueado:', user); // Depuración
+        console.log('Usuario logueado:', data.user); // Depuración
         document.getElementById('login-form').style.display = 'none';
         document.getElementById('content').style.display = 'block';
     }
