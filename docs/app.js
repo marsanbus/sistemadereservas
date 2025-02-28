@@ -7,7 +7,7 @@ if (typeof supabase === 'undefined') {
 
 // Inicializa Supabase
 const supabaseUrl = 'https://lvvihdrpnrhghlnejyzp.supabase.co';
-const supabaseKey = 'tu_clave_de_supabase'; // Reemplaza con tu clave real
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dmloZHJwbnJoZ2hsbmVqeXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3Mzc2NjEsImV4cCI6MjA1NjMxMzY2MX0.l1WggVuxur2JoPiqD4UzNwz9NL3ZFKvU7KlRh0FAWA8'; // Reemplaza con tu clave real
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 console.log('Supabase inicializado:', supabaseClient); // Depuración
