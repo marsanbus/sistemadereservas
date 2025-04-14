@@ -25,8 +25,9 @@ async function login() {
         alert(error.message);
     } else {
         console.log('Usuario logueado:', data.user); // Depuración
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('content').style.display = 'block';
+
+        // Redirige a index.html después de un inicio de sesión exitoso
+        window.location.href = 'index.html';
     }
 }
 
@@ -38,8 +39,9 @@ async function logout() {
         alert(error.message);
     } else {
         console.log('Sesión cerrada correctamente'); // Depuración
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('content').style.display = 'none';
+
+        // Redirige a login.html después de cerrar sesión
+        window.location.href = 'login.html';
     }
 }
 
@@ -48,11 +50,15 @@ async function checkSession() {
     const { data, error } = await supabaseClient.auth.getSession();
 
     if (data.session) {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('content').style.display = 'block';
+        // Redirige a index.html si el usuario ya está logueado
+        if (!window.location.href.includes('index.html')) {
+            window.location.href = 'index.html';
+        }
     } else {
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('content').style.display = 'none';
+        // Redirige a login.html si el usuario no está logueado
+        if (!window.location.href.includes('login.html')) {
+            window.location.href = 'login.html';
+        }
     }
 }
 
