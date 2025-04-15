@@ -50,14 +50,18 @@ async function checkSession() {
     const { data, error } = await supabaseClient.auth.getSession();
 
     if (data.session) {
-        // Redirige a index.html si el usuario ya está logueado
-        if (!window.location.href.includes('index.html')) {
+        // Permitir al usuario permanecer en cualquier página válida
+        const currentPage = window.location.pathname.split('/').pop(); // Obtiene el nombre del archivo actual
+        const allowedPages = ['index.html', 'reservas.html', 'auth/login.html']; // Lista de páginas permitidas
+
+        if (!allowedPages.includes(currentPage)) {
+            // Redirige a index.html si la página actual no está permitida
             window.location.href = 'index.html';
         }
     } else {
         // Redirige a login.html si el usuario no está logueado
-        if (!window.location.href.includes('login.html')) {
-            window.location.href = 'login.html';
+        if (!window.location.href.includes('auth/login.html')) {
+            window.location.href = 'auth/login.html';
         }
     }
 }
