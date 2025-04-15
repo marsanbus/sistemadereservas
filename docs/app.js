@@ -50,20 +50,39 @@ async function checkSession() {
     const { data, error } = await supabaseClient.auth.getSession();
 
     if (data.session) {
-        // Permitir al usuario permanecer en cualquier página válida
-        const currentPage = window.location.pathname.split('/').pop(); // Obtiene el nombre del archivo actual
-        const allowedPages = ['index.html', 'reservas.html', 'auth/login.html']; // Lista de páginas permitidas
-
+        const currentPage = window.location.pathname.split('/').pop();
+        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html'];
         if (!allowedPages.includes(currentPage)) {
-            // Redirige a index.html si la página actual no está permitida
             window.location.href = 'index.html';
         }
     } else {
-        // Redirige a login.html si el usuario no está logueado
-        if (!window.location.href.includes('auth/login.html')) {
-            window.location.href = 'auth/login.html';
+        const currentPage = window.location.pathname.split('/').pop();
+        // Permitir estar en login.html y register.html si no está logueado
+        if (currentPage !== 'login.html' && currentPage !== 'register.html') {
+            window.location.href = 'login.html';
         }
     }
+}
+
+async function register() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password
+    });
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    // (Opcional) Guardar datos adicionales en tu tabla users
+    // await supabaseClient.from('users').insert([{ id: data.user.id, email }]);
+
+    alert('Registro exitoso. Revisa tu correo para confirmar la cuenta.');
+    window.location.href = 'login.html';
 }
 
 checkSession();
