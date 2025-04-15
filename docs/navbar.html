@@ -1,18 +1,14 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="index.html">Sistema de Reservas</a>
+        <button type="button" class="navbar-brand btn btn-link" onclick="window.location.href='index.html'">Sistema de Reservas</button>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="reservas.html">Reservas</a>
-                </li>
-            </ul>
+            <div class="navbar-nav">
+                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.location.href='index.html'">Inicio</button>
+                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.location.href='reservas.html'">Reservas</button>
+            </div>
             <button type="button" class="btn btn-outline-danger ms-auto" onclick="logout()">Cerrar sesión</button>
         </div>
     </div>
