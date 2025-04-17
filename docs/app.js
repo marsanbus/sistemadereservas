@@ -51,7 +51,7 @@ async function checkSession() {
 
     if (data.session) {
         const currentPage = window.location.pathname.split('/').pop();
-        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html'];
+        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html', 'restaurantes.html'];
         if (!allowedPages.includes(currentPage)) {
             window.location.href = 'index.html';
         }
