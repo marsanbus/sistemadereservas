@@ -14,6 +14,11 @@
     <h1>Mis reservas</h1>
     <p>Aquí aparecerán mis reservas</p>
     </div>
+    <form id="reservation-form">
+        <input type="datetime-local" id="reservation-time" required>
+        <select id="table-id" required><!-- Se llena con JS --></select>
+        <button type="submit">Reservar</button>
+    </form>
     <script>
         // Función para cargar el navbar
         async function loadNavbar() {

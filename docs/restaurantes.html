@@ -14,6 +14,17 @@
     <h1>Restaurantes</h1>
     <p>Aquí aparecerán los restaurantes</p>
     </div>
+    <!-- Formulario para crear restaurante -->
+    <form id="restaurant-form" class="mb-4">
+        <input type="text" id="restaurant-name" placeholder="Nombre" required class="form-control mb-2">
+        <input type="text" id="restaurant-address" placeholder="Dirección" class="form-control mb-2">
+        <input type="text" id="restaurant-city" placeholder="Ciudad" class="form-control mb-2">
+        <input type="text" id="restaurant-phone" placeholder="Teléfono" class="form-control mb-2">
+        <button type="submit" class="btn btn-primary">Crear restaurante</button>
+    </form>
+
+<!-- Lista de restaurantes -->
+<div id="restaurants-list"></div>
     <script>
         // Función para cargar el navbar
         async function loadNavbar() {
@@ -27,7 +38,7 @@
     <div id="restaurants-list">
         <!-- Aquí se cargarán los restaurantes dinámicamente -->
     </div>
-    <script src="/docs/scripts/restaurantes.js"></script>  <!-- Nuevo archivo JS -->
+    <script src="restaurantes.js"></script>  <!-- Nuevo archivo JS -->
     <script src="app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
