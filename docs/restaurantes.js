@@ -24,23 +24,5 @@ async function loadRestaurants() {
     });
 }
 
-// Evento para crear restaurante
-document.getElementById('restaurant-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('restaurant-name').value;
-    const address = document.getElementById('restaurant-address').value;
-    const city = document.getElementById('restaurant-city').value;
-    const phone = document.getElementById('restaurant-phone').value;
-
-    const { error } = await supabaseClient.from('restaurants').insert([{ name, address, city, phone }]);
-    if (error) {
-        alert('Error al crear restaurante: ' + error.message);
-    } else {
-        alert('¡Restaurante creado!');
-        e.target.reset();
-        loadRestaurants();
-    }
-});
-
 // Cargar restaurantes al iniciar
 loadRestaurants();
