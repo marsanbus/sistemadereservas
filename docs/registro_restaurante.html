@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro Restaurante</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h2>Registro de Restaurante</h2>
+    <input type="email" id="email" placeholder="Correo electrónico" required><br>
+    <input type="password" id="password" placeholder="Contraseña" required><br>
+    <input type="text" id="restaurant-name" placeholder="Nombre del restaurante" required><br>
+    <input type="text" id="restaurant-address" placeholder="Dirección" required><br>
+    <input type="text" id="restaurant-city" placeholder="Ciudad" required><br>
+    <input type="text" id="restaurant-phone" placeholder="Teléfono" required><br>
+    <button onclick="registerRestaurante()">Registrarse como Restaurante</button>
+    <script src="app.js"></script>
+    <script>
+    async function registerRestaurante() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const name = document.getElementById('restaurant-name').value;
+        const address = document.getElementById('restaurant-address').value;
+        const city = document.getElementById('restaurant-city').value;
+        const phone = document.getElementById('restaurant-phone').value;
+
+        // 1. Crear usuario en Auth
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        const userId = data.user?.id;
+        if (userId) {
+            // 2. Guardar perfil con rol restaurante
+            const { error: profileError } = await supabaseClient.from('profiles').insert([
+                { id: userId, email, role: 'restaurante' }
+            ]);
+            if (profileError) {
+                alert('Error guardando perfil: ' + profileError.message);
+                return;
+            }
+
+            // 3. Guardar datos del restaurante
+            const { error: restError } = await supabaseClient.from('restaurants').insert([
+                { name, address, city, phone, email }
+            ]);
+            if (restError) {
+                alert('Error guardando restaurante: ' + restError.message);
+                return;
+            }
+        }
+
+        alert('Registro exitoso. Revisa tu correo para confirmar la cuenta.');
+        window.location.href = 'login.html';
+    }
+    </script>
+</body>
+</html>

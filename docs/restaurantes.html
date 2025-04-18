@@ -11,20 +11,10 @@
 <body>
     <div id="navbar"></div>
     <div id="content">
-    <h1>Restaurantes</h1>
-    <p>Aquí aparecerán los restaurantes</p>
+        <h1>Restaurantes</h1>
+        <div id="restaurants-list">
+        </div>
     </div>
-    <!-- Formulario para crear restaurante -->
-    <form id="restaurant-form" class="mb-4">
-        <input type="text" id="restaurant-name" placeholder="Nombre" required class="form-control mb-2">
-        <input type="text" id="restaurant-address" placeholder="Dirección" class="form-control mb-2">
-        <input type="text" id="restaurant-city" placeholder="Ciudad" class="form-control mb-2">
-        <input type="text" id="restaurant-phone" placeholder="Teléfono" class="form-control mb-2">
-        <button type="submit" class="btn btn-primary">Crear restaurante</button>
-    </form>
-
-<!-- Lista de restaurantes -->
-<div id="restaurants-list"></div>
     <script>
         // Función para cargar el navbar
         async function loadNavbar() {

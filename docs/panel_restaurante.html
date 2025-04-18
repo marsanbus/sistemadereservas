@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Restaurante</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Panel de Administración del Restaurante</h2>
+        <p id="welcome"></p>
+
+        <h4>Añadir nueva mesa</h4>
+        <form id="add-table-form" class="mb-4">
+            <input type="number" id="table-number" placeholder="Número de mesa" required class="form-control mb-2">
+            <input type="number" id="table-capacity" placeholder="Capacidad" required class="form-control mb-2">
+            <button type="submit" class="btn btn-primary">Añadir mesa</button>
+        </form>
+
+        <h4>Mesas del restaurante</h4>
+        <ul id="tables-list" class="list-group mb-4"></ul>
+
+        <h4>Reservas recibidas</h4>
+        <ul id="reservations-list" class="list-group"></ul>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+    let restauranteId = null;
+
+    // Cargar datos del restaurante y mostrar email
+    async function loadPanel() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        const { data: profile } = await supabaseClient.from('profiles').select('email').eq('id', user.id).single();
+        document.getElementById('welcome').textContent = `Bienvenido, ${profile?.email || ''}`;
+
+        // Buscar restaurante asociado a este usuario (puedes guardar el id del restaurante en profiles o buscar por email)
+        const { data: restaurantes } = await supabaseClient.from('restaurants').select('*').eq('email', profile.email);
+        if (!restaurantes || restaurantes.length === 0) {
+            alert('No tienes restaurante asociado. Contacta con el administrador.');
+            return;
+        }
+        restauranteId = restaurantes[0].id;
+
+        loadTables();
+        loadReservations();
+    }
+
+    // Añadir mesa
+    document.getElementById('add-table-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!restauranteId) return;
+        const table_number = document.getElementById('table-number').value;
+        const capacity = document.getElementById('table-capacity').value;
+        const { error } = await supabaseClient.from('tables').insert([{ restaurant_id: restauranteId, table_number, capacity }]);
+        if (error) {
+            alert('Error al añadir mesa: ' + error.message);
+        } else {
+            e.target.reset();
+            loadTables();
+        }
+    });
+
+    // Mostrar mesas
+    async function loadTables() {
+        const { data: tables } = await supabaseClient.from('tables').select('*').eq('restaurant_id', restauranteId).order('table_number');
+        const list = document.getElementById('tables-list');
+        list.innerHTML = '';
+        if (tables && tables.length > 0) {
+            tables.forEach(t => {
+                list.innerHTML += `<li class="list-group-item">Mesa ${t.table_number} - Capacidad: ${t.capacity}</li>`;
+            });
+        } else {
+            list.innerHTML = '<li class="list-group-item">No hay mesas registradas.</li>';
+        }
+    }
+
+    // Mostrar reservas recibidas
+    async function loadReservations() {
+        const { data: reservations } = await supabaseClient
+            .from('reservations')
+            .select('*, users:profiles(email)')
+            .eq('restaurant_id', restauranteId)
+            .order('reservation_date', { ascending: false });
+        const list = document.getElementById('reservations-list');
+        list.innerHTML = '';
+        if (reservations && reservations.length > 0) {
+            reservations.forEach(r => {
+                list.innerHTML += `<li class="list-group-item">
+                    Mesa: ${r.table_number} | Fecha: ${r.reservation_date} | Turno: ${r.shift || ''} <br>
+                    Cliente: ${r.users?.email || r.user_id}
+                </li>`;
+            });
+        } else {
+            list.innerHTML = '<li class="list-group-item">No hay reservas registradas.</li>';
+        }
+    }
+
+    loadPanel();
+    </script>
+</body>
+</html>

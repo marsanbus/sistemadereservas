@@ -26,8 +26,15 @@ async function login() {
     } else {
         console.log('Usuario logueado:', data.user); // Depuración
 
-        // Redirige a index.html después de un inicio de sesión exitoso
+    // Después de login exitoso
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
+
+    if (profile && profile.role === 'restaurante') {
+        window.location.href = 'panel_restaurante.html'; // (Crea este archivo para el panel de administración)
+    } else {
         window.location.href = 'index.html';
+    }
     }
 }
 
@@ -51,14 +58,18 @@ async function checkSession() {
 
     if (data.session) {
         const currentPage = window.location.pathname.split('/').pop();
-        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html', 'restaurantes.html'];
+        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html', 'restaurantes.html', 'registro_restaurante.html'];
         if (!allowedPages.includes(currentPage)) {
             window.location.href = 'index.html';
         }
     } else {
         const currentPage = window.location.pathname.split('/').pop();
-        // Permitir estar en login.html y register.html si no está logueado
-        if (currentPage !== 'login.html' && currentPage !== 'register.html') {
+        // Permitir estar en login.html, register.html y registro_restaurante.html si no está logueado
+        if (
+            currentPage !== 'login.html' &&
+            currentPage !== 'register.html' &&
+            currentPage !== 'registro_restaurante.html'
+        ) {
             window.location.href = 'login.html';
         }
     }
@@ -76,6 +87,13 @@ async function register() {
     if (error) {
         alert(error.message);
         return;
+    }
+
+    const userId = data.user?.id;
+    if (userId) {
+        await supabaseClient.from('profiles').insert([
+            { id: userId, email, role: 'cliente' }
+        ]);
     }
 
     // (Opcional) Guardar datos adicionales en tu tabla users
