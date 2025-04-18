@@ -79,6 +79,9 @@ async function checkSession() {
 async function register() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const name = document.getElementById('name').value;
+    const surname = document.getElementById('surname').value;
+    const alias = document.getElementById('alias').value;
 
     const { data, error } = await supabaseClient.auth.signUp({
         email,
@@ -92,15 +95,17 @@ async function register() {
 
     const userId = data.user?.id;
     if (userId) {
+        // Guarda el rol
         await supabaseClient.from('profiles').insert([
             { id: userId, email, role: 'cliente' }
         ]);
+        // Guarda los datos personales
+        await supabaseClient.from('users').insert([
+            { id: userId, email, name, surname, alias }
+        ]);
     }
 
-    // (Opcional) Guardar datos adicionales en tu tabla users
-    // await supabaseClient.from('users').insert([{ id: data.user.id, email }]);
-
-    alert('Registro exitoso. Revisa tu correo para confirmar la cuenta.');
+    alert('Registro exitoso.');
     window.location.href = 'login.html';
 }
 
