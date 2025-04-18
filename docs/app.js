@@ -30,8 +30,9 @@ async function login() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
 
+    console.log('Perfil obtenido:', profile);
     if (profile && profile.role === 'restaurante') {
-        window.location.href = 'panel_restaurante.html'; // (Crea este archivo para el panel de administración)
+        window.location.href = 'panel_restaurante.html';
     } else {
         window.location.href = 'index.html';
     }
@@ -58,7 +59,7 @@ async function checkSession() {
 
     if (data.session) {
         const currentPage = window.location.pathname.split('/').pop();
-        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html', 'restaurantes.html', 'registro_restaurante.html'];
+        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html', 'restaurantes.html', 'registro_restaurante.html', 'panel_restaurante.html'];
         if (!allowedPages.includes(currentPage)) {
             window.location.href = 'index.html';
         }

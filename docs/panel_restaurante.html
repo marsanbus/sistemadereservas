@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <div id="navbar"></div>
     <div class="container mt-4">
         <h2>Panel de Administración del Restaurante</h2>
         <p id="welcome"></p>
@@ -26,6 +27,16 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Función para cargar el navbar
+        async function loadNavbar() {
+            const navbar = await fetch('navbar.html').then(res => res.text());
+            document.getElementById('navbar').innerHTML = navbar;
+        }
+
+        // Llamar a la función para cargar el navbar
+        loadNavbar();
+    </script>
     <script>
     let restauranteId = null;
 
