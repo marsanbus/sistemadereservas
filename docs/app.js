@@ -30,43 +30,37 @@ async function login() {
         return;
     }
 
+    // Guarda el token en localStorage
+    if (result.session && result.session.access_token) {
+        localStorage.setItem('access_token', result.session.access_token);
+    } else if (result.access_token) {
+        localStorage.setItem('access_token', result.access_token);
+    }
+
     alert('Login correcto');
-    // Redirige según tu lógica
     window.location.href = 'index.html';
 }
 
 // Función para cerrar sesión
-async function logout() {
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-        alert(error.message);
-    } else {
-        // Si no hubo errores de logout, redirigimos a login.html después de cerrar sesión
-        window.location.href = 'login.html';
-    }
+function logout() {
+    localStorage.removeItem('access_token');
+    window.location.href = 'login.html';
 }
-
 // Función donde verificamos si el usuario ya ha iniciado sesión al cargar la página
-async function checkSession() {
-    const { data, error } = await supabaseClient.auth.getSession();
+function checkSession() {
+    const token = localStorage.getItem('access_token');
+    const currentPage = window.location.pathname.split('/').pop();
 
-    if (data.session) {
-        const currentPage = window.location.pathname.split('/').pop();
-        const allowedPages = ['index.html', 'reservas.html', 'login.html', 'register.html', 'restaurantes.html', 'registro_restaurante.html', 'panel_restaurante.html'];
-        if (!allowedPages.includes(currentPage)) {
-            window.location.href = 'index.html';
-        }
+    if (token) {
+        // Usuario logueado, permite acceso
     } else {
-        const currentPage = window.location.pathname.split('/').pop();
-        // Permitir estar en login.html, register.html y registro_restaurante.html si no está logueado
+        // No logueado
         if (
             currentPage !== 'login.html' && currentPage !== 'register.html' && currentPage !== 'registro_restaurante.html') {
                 window.location.href = 'login.html';
         }
     }
 }
-
 // Función para registrar un nuevo usuario
 async function register() {
     const email = document.getElementById('email').value;
