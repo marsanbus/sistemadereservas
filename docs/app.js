@@ -36,8 +36,6 @@ async function login() {
     } else if (result.access_token) {
         localStorage.setItem('access_token', result.access_token);
     }
-
-    alert('Login correcto');
     window.location.href = 'index.html';
 }
 
