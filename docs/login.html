@@ -10,9 +10,11 @@
 <body>
     <div id="login-form">
         <h2>Iniciar sesión</h2>
-        <input type="email" id="email" placeholder="Correo electrónico" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
-        <button onclick="login()">Iniciar sesión</button>
+        <form onsubmit="login(); return false;">
+            <input type="email" id="email" placeholder="Correo electrónico" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit">Iniciar sesión</button>
+        </form>
         <p>¿No tienes cuenta?</p>
         <a class="nav-link" href="register.html">Regístrate</a>
         <p>¿Eres un restaurante?</p>
