@@ -1,12 +1,33 @@
-document.getElementById('reservation-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Mostrar las reservas del usuario logueado
+async function loadMisReservas() {
     const { data: { user } } = await supabaseClient.auth.getUser();
-    const { error } = await supabaseClient.from('reservations').insert([{
-        user_id: user.id,
-        table_id: document.getElementById('table-id').value,
-        reservation_time: document.getElementById('reservation-time').value,
-        status: 'confirmed'
-    }]);
-    if (error) alert("Error al reservar: " + error.message);
-    else alert("¡Reserva confirmada!");
-});
+    if (!user) return;
+
+    // Trae reservas futuras y pasadas, ordenadas por fecha
+    const { data: reservas, error } = await supabaseClient
+        .from('reservations')
+        .select('*, restaurants(name, address)')
+        .eq('user_id', user.id)
+        .order('reservation_time', { ascending: true });
+
+    const list = document.getElementById('mis-reservas-list');
+    list.innerHTML = '';
+    if (error) {
+        list.innerHTML = '<li class="list-group-item text-danger">Error cargando reservas</li>';
+        return;
+    }
+    if (!reservas || reservas.length === 0) {
+        list.innerHTML = '<li class="list-group-item">No tienes reservas.</li>';
+        return;
+    }
+    reservas.forEach(r => {
+        list.innerHTML += `<li class="list-group-item">
+            <strong>${r.restaurants?.name || ''}</strong> - ${r.restaurants?.address || ''}<br>
+            Fecha: ${r.reservation_time.replace('T', ' ').substring(0, 16)}<br>
+            Comensales: ${r.number_of_guests}<br>
+            Estado: ${r.status}
+        </li>`;
+    });
+}
+
+loadMisReservas();

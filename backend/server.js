@@ -13,16 +13,6 @@ app.get('/restaurants', async (req, res) => {
     res.json(data);
 });
 
-// Nueva ruta para mesas de un restaurante
-app.get('/restaurants/:id/tables', async (req, res) => {
-    const { data, error } = await supabase
-        .from('tables')
-        .select('*')
-        .eq('restaurant_id', req.params.id);
-    if (error) return res.status(500).json({ error });
-    res.json(data);
-});
-
 // Ruta para crear una reserva
 app.post('/reservations', async (req, res) => {
     const { user_id, table_id, reservation_time, number_of_guests } = req.body;

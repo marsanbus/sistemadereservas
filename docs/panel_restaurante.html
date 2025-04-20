@@ -14,15 +14,12 @@
         <h2>Panel de Administración del Restaurante</h2>
         <p id="welcome"></p>
 
-        <h4>Añadir nueva mesa</h4>
-        <form id="add-table-form" class="mb-4">
-            <input type="number" id="table-number" placeholder="Número de mesa" required class="form-control mb-2">
-            <input type="number" id="table-capacity" placeholder="Capacidad" required class="form-control mb-2">
-            <button type="submit" class="btn btn-primary">Añadir mesa</button>
+        <h4>Editar capacidad del restaurante</h4>
+        <form id="edit-capacity-form" class="mb-4">
+            <input type="number" id="total-tables" placeholder="Número de mesas reservables" required class="form-control mb-2">
+            <input type="number" id="total-capacity" placeholder="Capacidad total de comensales" required class="form-control mb-2">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
         </form>
-
-        <h4>Mesas del restaurante</h4>
-        <ul id="tables-list" class="list-group mb-4"></ul>
 
         <h4>Reservas recibidas</h4>
         <ul id="reservations-list" class="list-group"></ul>
@@ -32,7 +29,7 @@
     <script>
     let restauranteId = null;
 
-    // Cargar datos del restaurante y mostrar email
+    // Cargar datos del restaurante y mostrar email/capacidad
     async function loadPanel() {
         const { data: { user } } = await supabaseClient.auth.getUser();
         const { data: profile } = await supabaseClient.from('profiles').select('email').eq('id', user.id).single();
@@ -44,59 +41,65 @@
             alert('No tienes restaurante asociado. Contacta con el administrador.');
             return;
         }
-        restauranteId = restaurantes[0].id;
+        const restaurante = restaurantes[0];
+        restauranteId = restaurante.id;
 
-        loadTables();
+        // Rellenar formulario con valores actuales
+        document.getElementById('total-tables').value = restaurante.total_tables || '';
+        document.getElementById('total-capacity').value = restaurante.total_capacity || '';
+
         loadReservations();
     }
 
-    // Añadir mesa
-    document.getElementById('add-table-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!restauranteId) return;
-        const table_number = document.getElementById('table-number').value;
-        const capacity = document.getElementById('table-capacity').value;
-        const { error } = await supabaseClient.from('tables').insert([{ restaurant_id: restauranteId, table_number, capacity }]);
-        if (error) {
-            alert('Error al añadir mesa: ' + error.message);
-        } else {
-            e.target.reset();
-            loadTables();
-        }
-    });
+    // Guardar cambios de capacidad
+    document.getElementById('edit-capacity-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!restauranteId) return;
+    const total_tables = parseInt(document.getElementById('total-tables').value, 10);
+    const total_capacity = parseInt(document.getElementById('total-capacity').value, 10);
 
-    // Mostrar mesas
-    async function loadTables() {
-        const { data: tables } = await supabaseClient.from('tables').select('*').eq('restaurant_id', restauranteId).order('table_number');
-        const list = document.getElementById('tables-list');
-        list.innerHTML = '';
-        if (tables && tables.length > 0) {
-            tables.forEach(t => {
-                list.innerHTML += `<li class="list-group-item">Mesa ${t.table_number} - Capacidad: ${t.capacity}</li>`;
-            });
-        } else {
-            list.innerHTML = '<li class="list-group-item">No hay mesas registradas.</li>';
-        }
+    // Validación extra
+    if (isNaN(total_tables) || isNaN(total_capacity)) {
+        alert('Introduce valores numéricos válidos.');
+        return;
     }
 
-    // Mostrar reservas recibidas
+    console.log('Actualizando restaurante:', restauranteId, total_tables, total_capacity);
+    console.log('typeof total_tables:', typeof total_tables, total_tables);
+    console.log('typeof total_capacity:', typeof total_capacity, total_capacity);
+    const { error } = await supabaseClient.from('restaurants').update({
+        total_tables, total_capacity
+    }).eq('id', restauranteId);
+    if (error) {
+        console.error('Error al guardar:', error);
+        alert('Error al guardar: ' + error.message);
+    } else {
+        alert('Datos actualizados');
+    }
+});
+
+    // Mostrar reservas recibidas (solo futuras)
     async function loadReservations() {
+        const now = new Date().toISOString();
         const { data: reservations } = await supabaseClient
             .from('reservations')
-            .select('*, users:profiles(email)')
+            .select('*, users(name, email)')
             .eq('restaurant_id', restauranteId)
-            .order('reservation_date', { ascending: false });
+            .gte('reservation_time', now)
+            .order('reservation_time', { ascending: true });
         const list = document.getElementById('reservations-list');
         list.innerHTML = '';
         if (reservations && reservations.length > 0) {
             reservations.forEach(r => {
                 list.innerHTML += `<li class="list-group-item">
-                    Mesa: ${r.table_number} | Fecha: ${r.reservation_date} | Turno: ${r.shift || ''} <br>
-                    Cliente: ${r.users?.email || r.user_id}
+                    <strong>${r.reservation_time.replace('T', ' ').substring(0, 16)}</strong> - ${r.number_of_guests} comensales<br>
+                    Nombre reserva: ${r.reservation_name || ''}<br>
+                    Teléfono: ${r.phone || ''}<br>
+                    Tarjeta: ${r.credit_card || ''}
                 </li>`;
             });
         } else {
-            list.innerHTML = '<li class="list-group-item">No hay reservas registradas.</li>';
+            list.innerHTML = '<li class="list-group-item">No hay reservas futuras.</li>';
         }
     }
 
