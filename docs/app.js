@@ -17,23 +17,22 @@ async function login() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Verifica que el email y la contraseña no estén vacíos
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const response = await fetch('https://sistemadereservas-d1t5.onrender.com/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
 
-    // Verifica si hubo un error al iniciar sesión
-    if (error) {
-        alert(error.message);
-    } else {
-        // Si no hubo errores de login, redirigimos a la página correspondiente según el rol
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
+    const result = await response.json();
 
-        if (profile && profile.role === 'restaurante') {
-            window.location.href = 'panel_restaurante.html';
-        } else {
-            window.location.href = 'index.html';
-        }
+    if (!response.ok) {
+        alert(result.error || 'Error al iniciar sesión');
+        return;
     }
+
+    alert('Login correcto');
+    // Redirige según tu lógica
+    window.location.href = 'index.html';
 }
 
 // Función para cerrar sesión

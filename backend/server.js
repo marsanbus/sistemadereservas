@@ -6,6 +6,16 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    // Usamos Supabase Auth para login
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+        return res.status(401).json({ error: error.message });
+    }
+    res.json(data);
+});
+
 // Ruta para obtener todos los restaurantes
 app.get('/restaurants', async (req, res) => {
     const { data, error } = await supabase.from('restaurants').select('*');
