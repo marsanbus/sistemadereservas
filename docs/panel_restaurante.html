@@ -74,6 +74,7 @@ async function loadPanel() {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ total_tables, total_capacity })
     });
@@ -112,7 +113,7 @@ async function loadPanel() {
         }
     }
 
-    await loadPanel();
+    loadPanel();
     loadReservations();
     </script>
 </body>
