@@ -16,6 +16,21 @@ app.post('/login', async (req, res) => {
     res.json(data);
 });
 
+app.post('/register', async (req, res) => {
+    const { email, password, name, surname, alias } = req.body;
+    // 1. Crear usuario en Supabase Auth
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return res.status(400).json({ error: error.message });
+
+    const userId = data.user?.id;
+    // 2. Guardar perfil y datos personales
+    if (userId) {
+        await supabase.from('profiles').insert([{ id: userId, email, role: 'cliente' }]);
+        await supabase.from('users').insert([{ id: userId, email, name, surname, alias }]);
+    }
+    res.json({ success: true });
+});
+
 // Ruta para obtener todos los restaurantes
 app.get('/restaurants', async (req, res) => {
     const { data, error } = await supabase.from('restaurants').select('*');

@@ -1,17 +1,3 @@
-// Verificamos que el SDK de Supabase esté cargado
-if (typeof supabase === 'undefined') {
-    console.error('Supabase no está cargado');
-} else {
-    console.log('Supabase está cargado');
-}
-
-// Inicializamos Supabase
-const supabaseUrl = 'https://lvvihdrpnrhghlnejyzp.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dmloZHJwbnJoZ2hsbmVqeXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3Mzc2NjEsImV4cCI6MjA1NjMxMzY2MX0.l1WggVuxur2JoPiqD4UzNwz9NL3ZFKvU7KlRh0FAWA8'; // Reemplaza con tu clave real
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-console.log('Supabase inicializado:', supabaseClient);
-
 // Función para iniciar sesión
 async function login() {
     const email = document.getElementById('email').value;
@@ -67,26 +53,17 @@ async function register() {
     const surname = document.getElementById('surname').value;
     const alias = document.getElementById('alias').value;
 
-    const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password
+    const response = await fetch('https://sistemadereservas-d1t5.onrender.com/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, surname, alias })
     });
 
-    if (error) {
-        alert(error.message);
-        return;
-    }
+    const result = await response.json();
 
-    const userId = data.user?.id;
-    if (userId) {
-        // Guardamos el rol
-        await supabaseClient.from('profiles').insert([
-            { id: userId, email, role: 'cliente' }
-        ]);
-        // Guardamos los datos personales
-        await supabaseClient.from('users').insert([
-            { id: userId, email, name, surname, alias }
-        ]);
+    if (!response.ok) {
+        alert(result.error || 'Error en el registro');
+        return;
     }
 
     alert('Registro exitoso.');
