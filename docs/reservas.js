@@ -1,18 +1,15 @@
-// Mostrar las reservas del usuario logueado
 async function loadMisReservas() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) return;
-
-    // Trae reservas futuras y pasadas, ordenadas por fecha
-    const { data: reservas, error } = await supabaseClient
-        .from('reservations')
-        .select('*, restaurants(name, address)')
-        .eq('user_id', user.id)
-        .order('reservation_time', { ascending: true });
+    const token = localStorage.getItem('access_token');
+    const response = await fetch('https://sistemadereservas-d1t5.onrender.com/my-reservations', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const reservas = await response.json();
 
     const list = document.getElementById('mis-reservas-list');
     list.innerHTML = '';
-    if (error) {
+    if (!response.ok) {
         list.innerHTML = '<li class="list-group-item text-danger">Error cargando reservas</li>';
         return;
     }

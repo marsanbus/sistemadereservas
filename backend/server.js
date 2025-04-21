@@ -161,6 +161,22 @@ app.post('/reservations', async (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/my-reservations', async (req, res) => {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return res.status(401).json({ error: 'No autorizado' });
+
+    const { data: reservas, error } = await supabase
+        .from('reservations')
+        .select('*, restaurants(name, address)')
+        .eq('user_id', user.id)
+        .order('reservation_time', { ascending: true });
+
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(reservas);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
