@@ -113,8 +113,11 @@ async function loadPanel() {
         }
     }
 
-    loadPanel();
-    loadReservations();
+    async function mainPanel() {
+        await loadPanel();
+        await loadReservations();
+    }
+    mainPanel();
     </script>
 </body>
 </html>
