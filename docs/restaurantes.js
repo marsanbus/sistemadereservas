@@ -78,52 +78,34 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     const telefono = document.getElementById('reserva-telefono').value;
     const tarjeta = document.getElementById('reserva-tarjeta').value;
 
-    // Comprobar disponibilidad
-    // 1. Obtener datos del restaurante
-    const { data: restaurante } = await supabaseClient.from('restaurants').select('total_tables, total_capacity').eq('id', restauranteId).single();
-    if (!restaurante) {
-        alert('Restaurante no encontrado');
+    const token = localStorage.getItem('access_token');
+
+    const response = await fetch('https://sistemadereservas-d1t5.onrender.com/reservations', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            restaurant_id: restauranteId,
+            reservation_name: nombreReserva,
+            reservation_time: fecha,
+            number_of_guests: comensales,
+            phone: telefono,
+            credit_card: tarjeta
+        })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(result.error || 'Error al reservar');
         return;
     }
 
-    // 2. Contar reservas para ese restaurante, fecha y hora
-    const { data: reservas } = await supabaseClient
-        .from('reservations')
-        .select('id, number_of_guests')
-        .eq('restaurant_id', restauranteId)
-        .eq('reservation_time', fecha);
-
-    const mesasReservadas = reservas.length;
-    const comensalesReservados = reservas.reduce((sum, r) => sum + r.number_of_guests, 0);
-
-    if (mesasReservadas >= restaurante.total_tables) {
-        alert('No hay mesas disponibles para esa fecha y hora.');
-        return;
-    }
-    if ((comensalesReservados + comensales) > restaurante.total_capacity) {
-        alert('No hay suficiente capacidad para esa cantidad de comensales en ese turno.');
-        return;
-    }
-
-    // 3. Insertar reserva
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    const { error } = await supabaseClient.from('reservations').insert([{
-        user_id: user.id,
-        restaurant_id: restauranteId,
-        reservation_time: fecha,
-        number_of_guests: comensales,
-        status: 'pending',
-        reservation_name: nombreReserva,
-        phone: telefono,
-        credit_card: tarjeta
-    }]);
-    if (error) {
-        alert('Error al reservar: ' + error.message);
-    } else {
-        alert('Reserva realizada correctamente');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('reservaModal'));
-        modal.hide();
-    }
+    alert('Reserva realizada correctamente');
+    const modal = bootstrap.Modal.getInstance(document.getElementById('reservaModal'));
+    modal.hide();
 });
 
 // Llama a la función para cargar los restaurantes al cargar la página

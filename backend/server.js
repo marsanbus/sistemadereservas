@@ -102,12 +102,63 @@ app.get('/restaurants/:id/reservations', async (req, res) => {
 
 // Ruta para crear una reserva
 app.post('/reservations', async (req, res) => {
-    const { user_id, table_id, reservation_time, number_of_guests } = req.body;
-    const { data, error } = await supabase
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return res.status(401).json({ error: 'No autorizado' });
+
+    const {
+        restaurant_id,
+        reservation_name,
+        reservation_time,
+        number_of_guests,
+        phone,
+        credit_card
+    } = req.body;
+
+    // 1. Obtener datos del restaurante
+    const { data: restaurante } = await supabase
+        .from('restaurants')
+        .select('total_tables, total_capacity')
+        .eq('id', restaurant_id)
+        .single();
+
+    if (!restaurante) {
+        return res.status(404).json({ error: 'Restaurante no encontrado' });
+    }
+
+    // 2. Contar reservas para ese restaurante, fecha y hora
+    const { data: reservas } = await supabase
         .from('reservations')
-        .insert([{ user_id, table_id, reservation_time, number_of_guests }]);
-    if (error) return res.status(500).json({ error });
-    res.json(data);
+        .select('id, number_of_guests')
+        .eq('restaurant_id', restaurant_id)
+        .eq('reservation_time', reservation_time);
+
+    const mesasReservadas = reservas.length;
+    const comensalesReservados = reservas.reduce((sum, r) => sum + r.number_of_guests, 0);
+
+    if (mesasReservadas >= restaurante.total_tables) {
+        return res.status(400).json({ error: 'No hay mesas disponibles para esa fecha y hora.' });
+    }
+    if ((comensalesReservados + number_of_guests) > restaurante.total_capacity) {
+        return res.status(400).json({ error: 'No hay suficiente capacidad para esa cantidad de comensales en ese turno.' });
+    }
+
+    // 3. Insertar reserva
+    const { error } = await supabase.from('reservations').insert([{
+        user_id: user.id,
+        restaurant_id,
+        reservation_time,
+        number_of_guests,
+        status: 'pending',
+        reservation_name,
+        phone,
+        credit_card
+    }]);
+    if (error) {
+        return res.status(500).json({ error: 'Error al reservar: ' + error.message });
+    }
+    res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
