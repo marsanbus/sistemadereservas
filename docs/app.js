@@ -22,7 +22,10 @@ async function login() {
     } else if (result.access_token) {
         localStorage.setItem('access_token', result.access_token);
     }
-    window.location.href = 'index.html';
+    if (result.role) {
+        localStorage.setItem('user_role', result.role);
+    }
+    window.location.href = (result.role === 'restaurante') ? 'panel_restaurante.html' : 'index.html';
 }
 
 // Función para cerrar sesión

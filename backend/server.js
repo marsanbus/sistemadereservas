@@ -8,12 +8,17 @@ app.use(express.json());
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    // Usamos Supabase Auth para login
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
         return res.status(401).json({ error: error.message });
     }
-    res.json(data);
+    const userId = data.user?.id;
+    let role = null;
+    if (userId) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single();
+        role = profile?.role || null;
+    }
+    res.json({ ...data, role });
 });
 
 app.post('/register', async (req, res) => {

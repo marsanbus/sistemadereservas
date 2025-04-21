@@ -1,3 +1,8 @@
+// Solo permite acceso a clientes
+if (localStorage.getItem('user_role') === 'restaurante') {
+    window.location.href = 'panel_restaurante.html';
+}
+
 // Función para registrar un nuevo restaurante
 window.registerRestaurant = async function() {
     const email = document.getElementById('email').value;
