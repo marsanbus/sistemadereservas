@@ -31,6 +31,19 @@ app.post('/register', async (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/register-restaurant', async (req, res) => {
+    const { email, password, name, address, city, phone } = req.body;
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return res.status(400).json({ error: error.message });
+
+    const userId = data.user?.id;
+    if (userId) {
+        await supabase.from('profiles').insert([{ id: userId, email, role: 'restaurante' }]);
+        await supabase.from('restaurants').insert([{ name, address, city, phone, email, owner_id: userId }]);
+    }
+    res.json({ success: true });
+});
+
 // Ruta para obtener todos los restaurantes
 app.get('/restaurants', async (req, res) => {
     const { data, error } = await supabase.from('restaurants').select('*');

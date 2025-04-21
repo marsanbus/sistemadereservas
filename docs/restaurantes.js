@@ -1,5 +1,5 @@
 // Función para registrar un nuevo restaurante
-async function registerRestaurant() {
+window.registerRestaurant = async function() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const name = document.getElementById('restaurant-name').value;
@@ -7,44 +7,30 @@ async function registerRestaurant() {
     const city = document.getElementById('restaurant-city').value;
     const phone = document.getElementById('restaurant-phone').value;
 
-    // 1. Crear usuario en Auth
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    if (error) {
-        alert(error.message);
+    const response = await fetch('https://sistemadereservas-d1t5.onrender.com/register-restaurant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, address, city, phone })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert(result.error || 'Error en el registro');
         return;
     }
 
-    const userId = data.user?.id;
-    if (userId) {
-// 2. Guardar perfil con rol restaurante
-const { error: profileError } = await supabaseClient.from('profiles').insert([
-    { id: userId, email, role: 'restaurante' }
-]);
-if (profileError) {
-    alert('Error guardando perfil: ' + profileError.message);
-    return;
-}
-
-// 3. Guardar datos del restaurante (AQUÍ AÑADES owner_id)
-const { error: restError } = await supabaseClient.from('restaurants').insert([
-    { name, address, city, phone, email, owner_id: userId }
-]);
-if (restError) {
-    alert('Error guardando restaurante: ' + restError.message);
-    return;
-}
-}
-
-    alert('Registro exitoso. Revisa tu correo para confirmar la cuenta.');
+    alert('Registro de restaurante exitoso.');
     window.location.href = 'login.html';
 }
 
 // Importamos los restaurantes desde Supabase
 async function loadRestaurants() {
-    const { data, error } = await supabaseClient.from('restaurants').select('*').order('created_at', { ascending: false });
+    const response = await fetch('https://sistemadereservas-d1t5.onrender.com/restaurants');
+    const data = await response.json();
     const list = document.getElementById('restaurants-list');
     list.innerHTML = '';
-    if (error) {
+    if (!response.ok) {
         list.innerHTML = '<div class="alert alert-danger">Error cargando restaurantes</div>';
         return;
     }
@@ -53,7 +39,7 @@ async function loadRestaurants() {
         return;
     }
     data.forEach(r => {
-        document.getElementById('restaurants-list').innerHTML += `
+        list.innerHTML += `
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
