@@ -56,6 +56,17 @@ app.get('/restaurants', async (req, res) => {
     res.json(data);
 });
 
+app.put('/restaurants/:id', async (req, res) => {
+    const { total_tables, total_capacity } = req.body;
+    const { id } = req.params;
+    const { error } = await supabase
+        .from('restaurants')
+        .update({ total_tables, total_capacity })
+        .eq('id', id);
+    if (error) return res.status(400).json({ error: error.message });
+    res.json({ success: true });
+});
+
 // Ruta para crear una reserva
 app.post('/reservations', async (req, res) => {
     const { user_id, table_id, reservation_time, number_of_guests } = req.body;
