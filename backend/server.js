@@ -67,6 +67,39 @@ app.put('/restaurants/:id', async (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/my-restaurant', async (req, res) => {
+    // Extrae el token del header Authorization
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '');
+    // Obtén el usuario desde el token
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) return res.status(401).json({ error: 'No autorizado' });
+
+    // Busca el restaurante asociado a ese usuario
+    const { data: restaurantes, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', user.id);
+
+    if (error || !restaurantes || restaurantes.length === 0) {
+        return res.status(404).json({ error: 'No tienes restaurante asociado' });
+    }
+    res.json(restaurantes[0]);
+});
+
+app.get('/restaurants/:id/reservations', async (req, res) => {
+    const { id } = req.params;
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+        .from('reservations')
+        .select('*, users(name, email)')
+        .eq('restaurant_id', id)
+        .gte('reservation_time', now)
+        .order('reservation_time', { ascending: true });
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(data);
+});
+
 // Ruta para crear una reserva
 app.post('/reservations', async (req, res) => {
     const { user_id, table_id, reservation_time, number_of_guests } = req.body;
