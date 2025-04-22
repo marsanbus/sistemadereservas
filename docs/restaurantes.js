@@ -75,12 +75,6 @@ function validarHoraReserva(fecha) {
     return false;
 }
 
-// En el submit del formulario:
-if (!validarHoraReserva(fecha)) {
-    alert('Solo puedes reservar entre 13:00-15:45 o 20:00-22:45, en intervalos de 15 minutos.');
-    return;
-}
-
 // Función para abrir el modal de reserva
 window.abrirReservaModal = async function(restauranteId, restauranteNombre) {
     document.getElementById('modal-restaurante-id').value = restauranteId;
