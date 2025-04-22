@@ -116,6 +116,21 @@ app.post('/reservations', async (req, res) => {
         credit_card
     } = req.body;
 
+    // 1. Validar hora y minutos permitidos
+    const fechaObj = new Date(reservation_time);
+    const hora = fechaObj.getHours();
+    const minutos = fechaObj.getMinutes();
+    const minutosValidos = [0, 15, 30, 45];
+    if (
+        !(
+            (hora >= 13 && hora <= 15 && minutosValidos.includes(minutos)) ||
+            (hora >= 20 && hora <= 22 && minutosValidos.includes(minutos)) ||
+            ((hora === 15 || hora === 22) && minutos === 45)
+        )
+    ) {
+        return res.status(400).json({ error: 'Hora de reserva no permitida.' });
+    }
+
     // 1. Obtener datos del restaurante
     const { data: restaurante } = await supabase
         .from('restaurants')

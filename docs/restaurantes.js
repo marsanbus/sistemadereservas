@@ -59,6 +59,28 @@ async function loadRestaurants() {
     });
 }
 
+function validarHoraReserva(fecha) {
+    const d = new Date(fecha);
+    const hora = d.getHours();
+    const minutos = d.getMinutes();
+    const minutosValidos = [0, 15, 30, 45];
+
+    // Comidas
+    if (hora >= 13 && hora <= 15 && minutosValidos.includes(minutos)) return true;
+    // Cenas
+    if (hora >= 20 && hora <= 22 && minutosValidos.includes(minutos)) return true;
+    // Último turno permitido: 15:45 o 22:45
+    if ((hora === 15 || hora === 22) && minutos === 45) return true;
+
+    return false;
+}
+
+// En el submit del formulario:
+if (!validarHoraReserva(fecha)) {
+    alert('Solo puedes reservar entre 13:00-15:45 o 20:00-22:45, en intervalos de 15 minutos.');
+    return;
+}
+
 // Función para abrir el modal de reserva
 window.abrirReservaModal = async function(restauranteId, restauranteNombre) {
     document.getElementById('modal-restaurante-id').value = restauranteId;
@@ -73,10 +95,27 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     e.preventDefault();
     const restauranteId = document.getElementById('modal-restaurante-id').value;
     const nombreReserva = document.getElementById('reserva-nombre').value;
-    const fecha = document.getElementById('reserva-fecha').value;
+    const dia = document.getElementById('reserva-dia').value; // yyyy-mm-dd
+    const hora = document.getElementById('reserva-hora').value; // "13", "14", etc.
+    const minutos = document.getElementById('reserva-minutos').value; // "00", "15", etc.
     const comensales = parseInt(document.getElementById('reserva-comensales').value, 10);
     const telefono = document.getElementById('reserva-telefono').value;
     const tarjeta = document.getElementById('reserva-tarjeta').value;
+
+    // Validación básica
+    if (!dia || !hora || !minutos) {
+        alert('Debes seleccionar fecha, hora y minutos.');
+        return;
+    }
+
+    // Une fecha y hora en formato ISO
+    const fecha = `${dia}T${hora.padStart(2, '0')}:${minutos}:00`;
+
+    // Validación de hora/minutos permitidos (opcional, ya que los selects lo limitan)
+    if (!validarHoraReserva(fecha)) {
+        alert('Solo puedes reservar entre 13:00-15:45 o 20:00-22:45, en intervalos de 15 minutos.');
+        return;
+    }
 
     const token = localStorage.getItem('access_token');
 
