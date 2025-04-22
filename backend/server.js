@@ -116,22 +116,34 @@ app.post('/reservations', async (req, res) => {
         credit_card
     } = req.body;
 
-    // 1. Validar hora y minutos permitidos
+    // 1. Validar hora y minutos permitidos y calcular turno
     const fechaObj = new Date(reservation_time);
     const hora = fechaObj.getHours();
     const minutos = fechaObj.getMinutes();
+    const dia = fechaObj.toISOString().split('T')[0]; // yyyy-mm-dd
     const minutosValidos = [0, 15, 30, 45];
-    if (
-        !(
-            (hora >= 13 && hora <= 15 && minutosValidos.includes(minutos)) ||
-            (hora >= 20 && hora <= 22 && minutosValidos.includes(minutos)) ||
-            ((hora === 15 || hora === 22) && minutos === 45)
-        )
-    ) {
+
+    let turnoInicio, turnoFin;
+    if (hora >= 13 && hora <= 15 && minutosValidos.includes(minutos)) {
+        turnoInicio = `${dia}T13:00:00`;
+        turnoFin = `${dia}T15:45:00`;
+    } else if (hora >= 20 && hora <= 22 && minutosValidos.includes(minutos)) {
+        turnoInicio = `${dia}T20:00:00`;
+        turnoFin = `${dia}T22:45:00`;
+    } else if ((hora === 15 || hora === 22) && minutos === 45) {
+        // Último turno permitido
+        if (hora === 15) {
+            turnoInicio = `${dia}T13:00:00`;
+            turnoFin = `${dia}T15:45:00`;
+        } else {
+            turnoInicio = `${dia}T20:00:00`;
+            turnoFin = `${dia}T22:45:00`;
+        }
+    } else {
         return res.status(400).json({ error: 'Hora de reserva no permitida.' });
     }
 
-    // 1. Obtener datos del restaurante
+    // 2. Obtener datos del restaurante
     const { data: restaurante } = await supabase
         .from('restaurants')
         .select('total_tables, total_capacity')
@@ -142,24 +154,25 @@ app.post('/reservations', async (req, res) => {
         return res.status(404).json({ error: 'Restaurante no encontrado' });
     }
 
-    // 2. Contar reservas para ese restaurante, fecha y hora
+    // 3. Contar reservas para ese restaurante, día y turno
     const { data: reservas } = await supabase
         .from('reservations')
         .select('id, number_of_guests')
         .eq('restaurant_id', restaurant_id)
-        .eq('reservation_time', reservation_time);
+        .gte('reservation_time', turnoInicio)
+        .lte('reservation_time', turnoFin);
 
     const mesasReservadas = reservas.length;
     const comensalesReservados = reservas.reduce((sum, r) => sum + r.number_of_guests, 0);
 
     if (mesasReservadas >= restaurante.total_tables) {
-        return res.status(400).json({ error: 'No hay mesas disponibles para esa fecha y hora.' });
+        return res.status(400).json({ error: 'No hay mesas disponibles para ese turno.' });
     }
     if ((comensalesReservados + number_of_guests) > restaurante.total_capacity) {
         return res.status(400).json({ error: 'No hay suficiente capacidad para esa cantidad de comensales en ese turno.' });
     }
 
-    // 3. Insertar reserva
+    // 4. Insertar reserva
     const { error } = await supabase.from('reservations').insert([{
         user_id: user.id,
         restaurant_id,
