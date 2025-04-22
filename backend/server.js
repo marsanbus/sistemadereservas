@@ -192,6 +192,32 @@ app.get('/my-reservations', async (req, res) => {
     res.json(reservas);
 });
 
+// Un restaurante acepta o deniega una reserva
+app.put('/reservations/:id/status', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body; // "accepted" o "denied"
+    if (!["accepted", "denied"].includes(status)) {
+        return res.status(400).json({ error: 'Estado no permitido' });
+    }
+    const { error } = await supabase
+        .from('reservations')
+        .update({ status })
+        .eq('id', id);
+    if (error) return res.status(400).json({ error: error.message });
+    res.json({ success: true });
+});
+
+// Un cliente cancela una reserva
+app.put('/reservations/:id/cancel', async (req, res) => {
+    const { id } = req.params;
+    const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled' })
+        .eq('id', id);
+    if (error) return res.status(400).json({ error: error.message });
+    res.json({ success: true });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
