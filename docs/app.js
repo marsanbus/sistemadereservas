@@ -31,6 +31,7 @@ async function login() {
 // Función para cerrar sesión
 function logout() {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user_role');
     window.location.href = 'login.html';
 }
 // Función donde verificamos si el usuario ya ha iniciado sesión al cargar la página
