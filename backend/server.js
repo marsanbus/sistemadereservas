@@ -166,6 +166,7 @@ app.post('/reservations', async (req, res) => {
         .from('reservations')
         .select('id, number_of_guests')
         .eq('restaurant_id', restaurant_id)
+        .in('status', ['pending', 'accepted'])
         .gte('reservation_time', turnoInicio)
         .lte('reservation_time', turnoFin);
 
