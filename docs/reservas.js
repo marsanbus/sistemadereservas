@@ -55,7 +55,7 @@ window.cancelarReserva = async function(id) {
     });
     const result = await response.json();
     if (!response.ok) {
-        alert(result.error || 'Error al cancelar la reserva');
+        mostrarMensaje(result.error || 'Error al cancelar la reserva');
         return;
     }
     await loadMisReservas();

@@ -18,7 +18,7 @@ async function loadPanel() {
     });
     const result = await response.json();
     if (!response.ok || !result || !result.id) {
-        alert('No tienes restaurante asociado. Contacta con el administrador.');
+        mostrarMensaje('No tienes restaurante asociado. Contacta con el administrador.');
         return;
     }
     restauranteId = result.id;
@@ -35,7 +35,7 @@ document.getElementById('edit-capacity-form').addEventListener('submit', async (
     const total_capacity = parseInt(document.getElementById('total-capacity').value, 10);
 
     if (isNaN(total_tables) || isNaN(total_capacity)) {
-        alert('Introduce valores numéricos válidos.');
+        mostrarMensaje('Introduce valores numéricos válidos.');
         return;
     }
 
@@ -52,9 +52,9 @@ document.getElementById('edit-capacity-form').addEventListener('submit', async (
     const result = await response.json();
 
     if (!response.ok) {
-        alert(result.error || 'Error al guardar');
+        mostrarMensaje(result.error || 'Error al guardar');
     } else {
-        alert('Datos actualizados');
+        mostrarMensaje('Datos actualizados');
     }
 });
 
@@ -110,7 +110,7 @@ window.cambiarEstadoReserva = async function (id, status) {
     });
     const result = await response.json();
     if (!response.ok) {
-        alert(result.error || 'Error al actualizar el estado');
+        mostrarMensaje(result.error || 'Error al actualizar el estado');
         return;
     }
     await loadReservations();

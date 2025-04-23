@@ -12,7 +12,7 @@ async function login() {
     const result = await response.json();
 
     if (!response.ok) {
-        alert(result.error || 'Error al iniciar sesión');
+        mostrarMensaje(result.error || 'Error al iniciar sesión');
         return;
     }
 
@@ -62,12 +62,19 @@ async function register() {
     const result = await response.json();
 
     if (!response.ok) {
-        alert(result.error || 'Error en el registro');
+        mostrarMensaje(result.error || 'Error en el registro');
         return;
     }
 
-    alert('Registro exitoso.');
+    mostrarMensaje('Registro exitoso.');
     window.location.href = 'login.html';
+}
+
+function mostrarMensaje(titulo, mensaje) {
+    document.getElementById('mensajeModalLabel').textContent = titulo || 'Mensaje';
+    document.getElementById('mensajeModalBody').innerHTML = mensaje;
+    const modal = new bootstrap.Modal(document.getElementById('mensajeModal'));
+    modal.show();
 }
 
 checkSession();

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Restaurante</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card p-4 shadow w-100" style="max-width: 500px;">
@@ -16,16 +18,34 @@
             <p id="welcome"></p>
             <h5>Editar capacidad del restaurante</h5>
             <form id="edit-capacity-form" class="mb-4">
-                <input type="number" id="total-tables" placeholder="Número de mesas reservables" required class="form-control mb-2">
-                <input type="number" id="total-capacity" placeholder="Capacidad total de comensales" required class="form-control mb-2">
+                <input type="number" id="total-tables" placeholder="Número de mesas reservables" required
+                    class="form-control mb-2">
+                <input type="number" id="total-capacity" placeholder="Capacidad total de comensales" required
+                    class="form-control mb-2">
                 <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
             </form>
             <h5>Reservas recibidas</h5>
             <ul id="reservations-list" class="list-group"></ul>
         </div>
     </div>
+     Modal para mensajes -->
+    <div class="modal fade" id="mensajeModal" tabindex="-1" aria-labelledby="mensajeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mensajeModalLabel">Mensaje</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body" id="mensajeModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
     <script src="panel_restaurante.js"></script>
 </body>
+
 </html>

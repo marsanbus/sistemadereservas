@@ -21,11 +21,11 @@ window.registerRestaurant = async function() {
     const result = await response.json();
 
     if (!response.ok) {
-        alert(result.error || 'Error en el registro');
+        mostrarMensaje(result.error || 'Error en el registro');
         return;
     }
 
-    alert('Registro de restaurante exitoso.');
+    mostrarMensaje('Registro de restaurante exitoso.');
     window.location.href = 'login.html';
 }
 
@@ -95,7 +95,7 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     const tarjeta = document.getElementById('reserva-tarjeta').value;
 
     if (!dia || !hora || !minutos) {
-        alert('Debes seleccionar fecha, hora y minutos.');
+        mostrarMensaje('Debes seleccionar fecha, hora y minutos.');
         return;
     }
 
@@ -122,11 +122,11 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     const result = await response.json();
 
     if (!response.ok) {
-        alert(result.error || 'Error al reservar');
+        mostrarMensaje(result.error || 'Error al reservar');
         return;
     }
 
-    alert('Reserva realizada correctamente');
+    mostrarMensaje('Reserva realizada correctamente');
     const modal = bootstrap.Modal.getInstance(document.getElementById('reservaModal'));
     modal.hide();
 });
