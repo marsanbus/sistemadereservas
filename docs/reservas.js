@@ -62,3 +62,4 @@ window.cancelarReserva = async function(id) {
 };
 
 loadMisReservas();
+setInterval(loadMisReservas, 5000);

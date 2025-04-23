@@ -22,7 +22,7 @@ async function loadPanel() {
         return;
     }
     restauranteId = result.id;
-    document.getElementById('welcome').textContent = `Bienvenido, ${result.email || ''}`;
+    document.getElementById('welcome').textContent = `Bienvenido, ${result.name || ''}`;
     document.getElementById('total-tables').value = result.total_tables || '';
     document.getElementById('total-capacity').value = result.total_capacity || '';
 }
@@ -119,5 +119,6 @@ window.cambiarEstadoReserva = async function (id, status) {
 async function mainPanel() {
     await loadPanel();
     await loadReservations();
+    setInterval(loadReservations, 5000);
 }
 mainPanel();

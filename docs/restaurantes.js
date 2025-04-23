@@ -11,11 +11,13 @@ window.registerRestaurant = async function() {
     const address = document.getElementById('restaurant-address').value;
     const city = document.getElementById('restaurant-city').value;
     const phone = document.getElementById('restaurant-phone').value;
+    const total_tables = parseInt(document.getElementById('restaurant-tables').value, 10);
+    const total_capacity = parseInt(document.getElementById('restaurant-capacity').value, 10);
 
     const response = await fetch('https://sistemadereservas-d1t5.onrender.com/register-restaurant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, address, city, phone })
+        body: JSON.stringify({ email, password, name, address, city, phone, total_tables, total_capacity })
     });
 
     const result = await response.json();
@@ -140,4 +142,7 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
 });
 
 // Llama a la función para cargar los restaurantes al cargar la página
-window.addEventListener('DOMContentLoaded', loadRestaurants);
+window.addEventListener('DOMContentLoaded', () => {
+    loadRestaurants();
+    setInterval(loadRestaurants, 10000);
+});

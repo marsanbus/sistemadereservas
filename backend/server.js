@@ -22,14 +22,16 @@ app.post('/register', async (req, res) => {
 
 // Ruta para registrar un nuevo restaurante
 app.post('/register-restaurant', async (req, res) => {
-    const { email, password, name, address, city, phone } = req.body;
+    const { email, password, name, address, city, phone, total_tables, total_capacity } = req.body;
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return res.status(400).json({ error: error.message });
 
     const userId = data.user?.id;
     if (userId) {
         await supabase.from('profiles').insert([{ id: userId, email, role: 'restaurante' }]);
-        await supabase.from('restaurants').insert([{ name, address, city, phone, email, owner_id: userId }]);
+        await supabase.from('restaurants').insert([{
+            name, address, city, phone, email, owner_id: userId, total_tables, total_capacity
+        }]);
     }
     res.json({ success: true });
 });
