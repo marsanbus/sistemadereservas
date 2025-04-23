@@ -22,18 +22,24 @@ async function loadMisReservas() {
     // Recorremos las reservas y mostramos su información y acciones según el estado
     reservas.forEach(r => {
         let acciones = '';
-        if (r.status === 'pending' || r.status === 'accepted') {
-            acciones = `<button class="btn btn-danger btn-sm" onclick="cancelarReserva('${r.id}')">Cancelar</button>`;
+        let estado = '';
+        if (r.status === 'pending') {
+            estado = `<span class="badge bg-warning text-dark">Pendiente</span>`;
+            // Botón cancelar más separado
+            acciones = `<button class="btn btn-danger btn-sm ms-3" onclick="cancelarReserva('${r.id}')">Cancelar</button>`;
+        } else if (r.status === 'accepted') {
+            estado = `<span class="badge bg-success">Aceptada</span>`;
+            acciones = `<button class="btn btn-danger btn-sm ms-3" onclick="cancelarReserva('${r.id}')">Cancelar</button>`;
         } else if (r.status === 'denied') {
-            acciones = `<span class="badge bg-danger">Denegada</span>`;
+            estado = `<span class="badge bg-danger">Denegada</span>`;
         } else if (r.status === 'cancelled') {
-            acciones = `<span class="badge bg-secondary">Cancelada</span>`;
+            estado = `<span class="badge bg-secondary">Cancelada</span>`;
         }
         list.innerHTML += `<li class="list-group-item">
             <strong>${r.restaurants?.name || ''}</strong> - ${r.restaurants?.address || ''}<br>
             Fecha: ${r.reservation_time.replace('T', ' ').substring(0, 16)}<br>
             Comensales: ${r.number_of_guests}<br>
-            Estado: ${r.status} ${acciones}
+            Estado: ${estado}${acciones}
         </li>`;
     });
 }
