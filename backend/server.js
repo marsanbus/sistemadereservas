@@ -124,6 +124,10 @@ app.post('/reservations', async (req, res) => {
     const dia = fechaObj.toISOString().split('T')[0];
     const minutosValidos = [0, 15, 30, 45];
 
+    if (fechaObj < ahora) {
+        return res.status(400).json({ error: 'No puedes reservar para una fecha y hora anterior a la actual.' });
+    }
+    
     let turnoInicio, turnoFin;
     if (hora >= 13 && hora <= 15 && minutosValidos.includes(minutos)) {
         turnoInicio = `${dia}T13:00:00`;

@@ -87,9 +87,9 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     e.preventDefault();
     const restauranteId = document.getElementById('modal-restaurante-id').value;
     const nombreReserva = document.getElementById('reserva-nombre').value;
-    const dia = document.getElementById('reserva-dia').value; // yyyy-mm-dd
-    const hora = document.getElementById('reserva-hora').value; // "13", "14", etc.
-    const minutos = document.getElementById('reserva-minutos').value; // "00", "15", etc.
+    const dia = document.getElementById('reserva-dia').value;
+    const hora = document.getElementById('reserva-hora').value;
+    const minutos = document.getElementById('reserva-minutos').value;
     const comensales = parseInt(document.getElementById('reserva-comensales').value, 10);
     const telefono = document.getElementById('reserva-telefono').value;
     const tarjeta = document.getElementById('reserva-tarjeta').value;

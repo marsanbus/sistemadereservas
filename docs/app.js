@@ -72,7 +72,7 @@ async function register() {
 
 function mostrarMensaje(titulo, mensaje) {
     document.getElementById('mensajeModalLabel').textContent = titulo || 'Mensaje';
-    document.getElementById('mensajeModalBody').innerHTML = mensaje;
+    document.getElementById('mensajeModalBody').innerHTML = mensaje || '';
     const modal = new bootstrap.Modal(document.getElementById('mensajeModal'));
     modal.show();
 }
