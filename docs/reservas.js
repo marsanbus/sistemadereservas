@@ -1,3 +1,4 @@
+// Función para cargar y mostrar las reservas del usuario autenticado
 async function loadMisReservas() {
     const token = localStorage.getItem('access_token');
     const response = await fetch('https://sistemadereservas-d1t5.onrender.com/my-reservations', {
@@ -17,6 +18,8 @@ async function loadMisReservas() {
         list.innerHTML = '<li class="list-group-item">No tienes reservas.</li>';
         return;
     }
+
+    // Recorremos las reservas y mostramos su información y acciones según el estado
     reservas.forEach(r => {
         let acciones = '';
         if (r.status === 'pending' || r.status === 'accepted') {
@@ -35,6 +38,7 @@ async function loadMisReservas() {
     });
 }
 
+// Función para cancelar una reserva
 window.cancelarReserva = async function(id) {
     const token = localStorage.getItem('access_token');
     const response = await fetch(`https://sistemadereservas-d1t5.onrender.com/reservations/${id}/cancel`, {

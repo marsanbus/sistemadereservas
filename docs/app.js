@@ -16,7 +16,7 @@ async function login() {
         return;
     }
 
-    // Guarda el token en localStorage
+    // Guardamos el token en localStorage
     if (result.session && result.session.access_token) {
         localStorage.setItem('access_token', result.session.access_token);
     } else if (result.access_token) {
@@ -25,7 +25,7 @@ async function login() {
     if (result.role) {
         localStorage.setItem('user_role', result.role);
     }
-    window.location.href = (result.role === 'restaurante') ? 'panel_restaurante.html' : 'index.html';
+    window.location.href = (result.role === 'restaurante') ? 'panel_restaurante.html' : 'restaurantes.html';
 }
 
 // Función para cerrar sesión
@@ -34,21 +34,17 @@ function logout() {
     localStorage.removeItem('user_role');
     window.location.href = 'login.html';
 }
+
 // Función donde verificamos si el usuario ya ha iniciado sesión al cargar la página
 function checkSession() {
     const token = localStorage.getItem('access_token');
     const currentPage = window.location.pathname.split('/').pop();
 
-    if (token) {
-        // Usuario logueado, permite acceso
-    } else {
-        // No logueado
-        if (
-            currentPage !== 'login.html' && currentPage !== 'register.html' && currentPage !== 'registro_restaurante.html') {
-                window.location.href = 'login.html';
-        }
+    if (!token && currentPage !== 'login.html' && currentPage !== 'register.html' && currentPage !== 'registro_restaurante.html') {
+        window.location.href = 'login.html';
     }
 }
+
 // Función para registrar un nuevo usuario
 async function register() {
     const email = document.getElementById('email').value;

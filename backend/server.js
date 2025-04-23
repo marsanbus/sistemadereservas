@@ -1,11 +1,40 @@
 const express = require('express');
 const app = express();
-const supabase = require('./supabase'); // Configuración de Supabase
+const supabase = require('./supabase');
 const cors = require('cors');
 
 app.use(cors());
 app.use(express.json());
 
+// Ruta para registrar un nuevo usuario
+app.post('/register', async (req, res) => {
+    const { email, password, name, surname, alias } = req.body;
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return res.status(400).json({ error: error.message });
+
+    const userId = data.user?.id;
+    if (userId) {
+        await supabase.from('profiles').insert([{ id: userId, email, role: 'cliente' }]);
+        await supabase.from('users').insert([{ id: userId, email, name, surname, alias }]);
+    }
+    res.json({ success: true });
+});
+
+// Ruta para registrar un nuevo restaurante
+app.post('/register-restaurant', async (req, res) => {
+    const { email, password, name, address, city, phone } = req.body;
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return res.status(400).json({ error: error.message });
+
+    const userId = data.user?.id;
+    if (userId) {
+        await supabase.from('profiles').insert([{ id: userId, email, role: 'restaurante' }]);
+        await supabase.from('restaurants').insert([{ name, address, city, phone, email, owner_id: userId }]);
+    }
+    res.json({ success: true });
+});
+
+// Ruta para iniciar sesión
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -21,34 +50,6 @@ app.post('/login', async (req, res) => {
     res.json({ ...data, role });
 });
 
-app.post('/register', async (req, res) => {
-    const { email, password, name, surname, alias } = req.body;
-    // 1. Crear usuario en Supabase Auth
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return res.status(400).json({ error: error.message });
-
-    const userId = data.user?.id;
-    // 2. Guardar perfil y datos personales
-    if (userId) {
-        await supabase.from('profiles').insert([{ id: userId, email, role: 'cliente' }]);
-        await supabase.from('users').insert([{ id: userId, email, name, surname, alias }]);
-    }
-    res.json({ success: true });
-});
-
-app.post('/register-restaurant', async (req, res) => {
-    const { email, password, name, address, city, phone } = req.body;
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return res.status(400).json({ error: error.message });
-
-    const userId = data.user?.id;
-    if (userId) {
-        await supabase.from('profiles').insert([{ id: userId, email, role: 'restaurante' }]);
-        await supabase.from('restaurants').insert([{ name, address, city, phone, email, owner_id: userId }]);
-    }
-    res.json({ success: true });
-});
-
 // Ruta para obtener todos los restaurantes
 app.get('/restaurants', async (req, res) => {
     const { data, error } = await supabase.from('restaurants').select('*');
@@ -56,6 +57,7 @@ app.get('/restaurants', async (req, res) => {
     res.json(data);
 });
 
+// Ruta para actualizar los datos de un restaurante concreto por su ID
 app.put('/restaurants/:id', async (req, res) => {
     const { total_tables, total_capacity } = req.body;
     const { id } = req.params;
@@ -67,15 +69,13 @@ app.put('/restaurants/:id', async (req, res) => {
     res.json({ success: true });
 });
 
+// Ruta para obtener los datos del restaurante asociado al usuario autenticado (restaurante logueado)
 app.get('/my-restaurant', async (req, res) => {
-    // Extrae el token del header Authorization
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
-    // Obtén el usuario desde el token
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) return res.status(401).json({ error: 'No autorizado' });
 
-    // Busca el restaurante asociado a ese usuario
     const { data: restaurantes, error } = await supabase
         .from('restaurants')
         .select('*')
@@ -87,6 +87,7 @@ app.get('/my-restaurant', async (req, res) => {
     res.json(restaurantes[0]);
 });
 
+// Ruta para obtener las reservas de un restaurante
 app.get('/restaurants/:id/reservations', async (req, res) => {
     const { id } = req.params;
     const now = new Date().toISOString();
@@ -116,11 +117,11 @@ app.post('/reservations', async (req, res) => {
         credit_card
     } = req.body;
 
-    // 1. Validar hora y minutos permitidos y calcular turno
+    // 1. Validamos las horas y minutos permitidos y calculamos que turno es
     const fechaObj = new Date(reservation_time);
     const hora = fechaObj.getHours();
     const minutos = fechaObj.getMinutes();
-    const dia = fechaObj.toISOString().split('T')[0]; // yyyy-mm-dd
+    const dia = fechaObj.toISOString().split('T')[0];
     const minutosValidos = [0, 15, 30, 45];
 
     let turnoInicio, turnoFin;
@@ -131,7 +132,6 @@ app.post('/reservations', async (req, res) => {
         turnoInicio = `${dia}T20:00:00`;
         turnoFin = `${dia}T22:45:00`;
     } else if ((hora === 15 || hora === 22) && minutos === 45) {
-        // Último turno permitido
         if (hora === 15) {
             turnoInicio = `${dia}T13:00:00`;
             turnoFin = `${dia}T15:45:00`;
@@ -143,7 +143,7 @@ app.post('/reservations', async (req, res) => {
         return res.status(400).json({ error: 'Hora de reserva no permitida.' });
     }
 
-    // 2. Obtener datos del restaurante
+    // 2. Obtenemos los datos del restaurante
     const { data: restaurante } = await supabase
         .from('restaurants')
         .select('total_tables, total_capacity')
@@ -154,7 +154,7 @@ app.post('/reservations', async (req, res) => {
         return res.status(404).json({ error: 'Restaurante no encontrado' });
     }
 
-    // 3. Contar reservas para ese restaurante, día y turno
+    // 3. Contamos las reservas para ese restaurante por día y turno
     const { data: reservas } = await supabase
         .from('reservations')
         .select('id, number_of_guests')
@@ -172,7 +172,7 @@ app.post('/reservations', async (req, res) => {
         return res.status(400).json({ error: 'No hay suficiente capacidad para esa cantidad de comensales en ese turno.' });
     }
 
-    // 4. Insertar reserva
+    // 4. Insertamos la reserva
     const { error } = await supabase.from('reservations').insert([{
         user_id: user.id,
         restaurant_id,
@@ -189,6 +189,7 @@ app.post('/reservations', async (req, res) => {
     res.json({ success: true });
 });
 
+// Ruta para obtener las reservas de un cliente
 app.get('/my-reservations', async (req, res) => {
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
@@ -205,10 +206,10 @@ app.get('/my-reservations', async (req, res) => {
     res.json(reservas);
 });
 
-// Un restaurante acepta o deniega una reserva
+// Ruta para que un restaurante pueda aceptar o denegar una reserva
 app.put('/reservations/:id/status', async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; // "accepted" o "denied"
+    const { status } = req.body;
     if (!["accepted", "denied"].includes(status)) {
         return res.status(400).json({ error: 'Estado no permitido' });
     }
@@ -220,7 +221,7 @@ app.put('/reservations/:id/status', async (req, res) => {
     res.json({ success: true });
 });
 
-// Un cliente cancela una reserva
+// Ruta para que un cliente pueda cancelar una reserva
 app.put('/reservations/:id/cancel', async (req, res) => {
     const { id } = req.params;
     const { error } = await supabase
