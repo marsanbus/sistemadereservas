@@ -18,7 +18,7 @@ async function loadPanel() {
     });
     const result = await response.json();
     if (!response.ok || !result || !result.id) {
-        mostrarMensaje('No tienes restaurante asociado. Contacta con el administrador.');
+        mostrarMensaje('Error', 'No tienes restaurante asociado. Contacta con el administrador.');
         return;
     }
     restauranteId = result.id;
@@ -35,7 +35,7 @@ document.getElementById('edit-capacity-form').addEventListener('submit', async (
     const total_capacity = parseInt(document.getElementById('total-capacity').value, 10);
 
     if (isNaN(total_tables) || isNaN(total_capacity)) {
-        mostrarMensaje('Introduce valores numéricos válidos.');
+        mostrarMensaje('Error', 'Introduce valores numéricos válidos.');
         return;
     }
 
@@ -54,7 +54,7 @@ document.getElementById('edit-capacity-form').addEventListener('submit', async (
     if (!response.ok) {
         mostrarMensaje(result.error || 'Error al guardar');
     } else {
-        mostrarMensaje('Datos actualizados');
+        mostrarMensaje('Información', 'Datos actualizados');
     }
 });
 

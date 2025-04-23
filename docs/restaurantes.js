@@ -25,7 +25,7 @@ window.registerRestaurant = async function() {
         return;
     }
 
-    mostrarMensaje('Registro de restaurante exitoso.');
+    mostrarMensaje('Bienvenido', 'Registro de restaurante exitoso.');
     window.location.href = 'login.html';
 }
 
@@ -95,11 +95,19 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     const tarjeta = document.getElementById('reserva-tarjeta').value;
 
     if (!dia || !hora || !minutos) {
-        mostrarMensaje('Debes seleccionar fecha, hora y minutos.');
+        mostrarMensaje('Error', 'Debes seleccionar fecha, hora y minutos.');
         return;
     }
 
     const fecha = `${dia}T${hora.padStart(2, '0')}:${minutos}:00`;
+
+    // Validación para no permitir reservas en el pasado
+    const fechaReserva = new Date(fecha);
+    const ahora = new Date();
+    if (fechaReserva < ahora) {
+        mostrarMensaje('Error', 'No puedes realizar una reserva para una fecha y hora anterior a la actual.');
+        return;
+    }
 
     const token = localStorage.getItem('access_token');
 

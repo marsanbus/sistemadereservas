@@ -66,7 +66,7 @@ async function register() {
         return;
     }
 
-    mostrarMensaje('Registro exitoso.');
+    mostrarMensaje('Bienvenido', 'Registro exitoso.');
     window.location.href = 'login.html';
 }
 
