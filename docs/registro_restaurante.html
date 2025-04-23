@@ -6,35 +6,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <div class="container py-4">
-        <div class="card shadow mx-auto" style="max-width: 500px;">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Registro de Restaurante</h2>
-                    <form id="form-registro-restaurante" onsubmit="registerRestaurant(); return false;">
-                        <div class="mb-3">
-                            <input type="email" id="email" class="form-control" placeholder="Correo electrónico" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" id="password" class="form-control" placeholder="Contraseña" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" id="restaurant-name" class="form-control" placeholder="Nombre del restaurante" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" id="restaurant-address" class="form-control" placeholder="Dirección" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" id="restaurant-city" class="form-control" placeholder="Ciudad" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" id="restaurant-phone" class="form-control" placeholder="Teléfono" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Registrarse como Restaurante</button>
-                    </form>
-                    <div class="d-flex justify-content-between mt-3">
-                        <a href="login.html" class="btn btn-outline-secondary btn-sm">Volver a Login</a>
-                    </div>
-                </div>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card p-4 shadow" style="max-width: 350px; width: 100%;">
+            <h2 class="card-title text-center mb-4">Registro de Restaurante</h2>
+            <form id="form-registro-restaurante" onsubmit="registerRestaurant(); return false;">
+                <input type="email" id="email" class="form-control mb-3" placeholder="Correo electrónico" required>
+                <input type="password" id="password" class="form-control mb-3" placeholder="Contraseña" required>
+                <input type="text" id="restaurant-name" class="form-control mb-3" placeholder="Nombre del restaurante" required>
+                <input type="text" id="restaurant-address" class="form-control mb-3" placeholder="Dirección" required>
+                <input type="text" id="restaurant-city" class="form-control mb-3" placeholder="Ciudad" required>
+                <input type="text" id="restaurant-phone" class="form-control mb-3" placeholder="Teléfono" required>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Registrarse como Restaurante</button>
+            </form>
+            <div class="d-flex justify-content-between mt-2">
+                <a href="login.html" class="btn btn-outline-secondary btn-sm">Volver a Login</a>
             </div>
         </div>
     </div>

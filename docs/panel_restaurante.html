@@ -7,27 +7,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container py-3">
-        <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-outline-danger" onclick="logout()">Cerrar sesión</button>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card p-4 shadow w-100" style="max-width: 500px;">
+            <div class="d-flex justify-content-end mb-2">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="logout()">Cerrar sesión</button>
+            </div>
+            <h2 class="mb-3">Panel de Administración</h2>
+            <p id="welcome"></p>
+
+            <h5>Editar capacidad del restaurante</h5>
+            <form id="edit-capacity-form" class="mb-4">
+                <input type="number" id="total-tables" placeholder="Número de mesas reservables" required class="form-control mb-2">
+                <input type="number" id="total-capacity" placeholder="Capacidad total de comensales" required class="form-control mb-2">
+                <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+            </form>
+
+            <h5>Reservas recibidas</h5>
+            <ul id="reservations-list" class="list-group"></ul>
         </div>
-        <h2>Panel de Administración del Restaurante</h2>
-        <p id="welcome"></p>
-
-        <h4>Editar capacidad del restaurante</h4>
-        <form id="edit-capacity-form" class="mb-4">
-            <input type="number" id="total-tables" placeholder="Número de mesas reservables" required
-                class="form-control mb-2">
-            <input type="number" id="total-capacity" placeholder="Capacidad total de comensales" required
-                class="form-control mb-2">
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-        </form>
-
-        <h4>Reservas recibidas</h4>
-        <ul id="reservations-list" class="list-group"></ul>
     </div>
-
     <script src="app.js"></script>
     <script>
         let restauranteId = null;
