@@ -14,8 +14,7 @@ app.post('/register', async (req, res) => {
 
     const userId = data.user?.id;
     if (userId) {
-        await supabase.from('profiles').insert([{ id: userId, email, role: 'cliente' }]);
-        await supabase.from('users').insert([{ id: userId, email, name, surname, alias }]);
+        await supabase.from('clients').insert([{ id: userId, email, name, surname, alias }]);
     }
     res.json({ success: true });
 });
@@ -28,10 +27,7 @@ app.post('/register-restaurant', async (req, res) => {
 
     const userId = data.user?.id;
     if (userId) {
-        await supabase.from('profiles').insert([{ id: userId, email, role: 'restaurante' }]);
-        await supabase.from('restaurants').insert([{
-            name, address, city, phone, email, owner_id: userId, total_tables, total_capacity
-        }]);
+        await supabase.from('restaurants').insert([{ id: userId, email, name, address, city, phone, total_tables, total_capacity }]);
     }
     res.json({ success: true });
 });
@@ -81,7 +77,7 @@ app.get('/my-restaurant', async (req, res) => {
     const { data: restaurantes, error } = await supabase
         .from('restaurants')
         .select('*')
-        .eq('owner_id', user.id);
+        .eq('id', user.id)
 
     if (error || !restaurantes || restaurantes.length === 0) {
         return res.status(404).json({ error: 'No tienes restaurante asociado' });
@@ -95,7 +91,7 @@ app.get('/restaurants/:id/reservations', async (req, res) => {
     const now = new Date().toISOString();
     const { data, error } = await supabase
         .from('reservations')
-        .select('*, users(name, email)')
+        .select('*, clients(name, email)')
         .eq('restaurant_id', id)
         .gte('reservation_time', now)
         .order('reservation_time', { ascending: true });
