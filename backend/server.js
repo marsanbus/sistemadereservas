@@ -14,7 +14,14 @@ app.post('/register', async (req, res) => {
 
     const userId = data.user?.id;
     if (userId) {
-        await supabase.from('clients').insert([{ id: userId, email, name, surname, alias }]);
+        await supabase.from('clients').insert([{
+            id: userId,
+            email,
+            name,
+            surname,
+            alias,
+            role: 'cliente'
+        }]);
     }
     res.json({ success: true });
 });
@@ -27,7 +34,17 @@ app.post('/register-restaurant', async (req, res) => {
 
     const userId = data.user?.id;
     if (userId) {
-        await supabase.from('restaurants').insert([{ id: userId, email, name, address, city, phone, total_tables, total_capacity }]);
+        await supabase.from('restaurants').insert([{
+            id: userId,
+            email,
+            name,
+            address,
+            city,
+            phone,
+            total_tables,
+            total_capacity,
+            role: 'restaurante'
+        }]);
     }
     res.json({ success: true });
 });
@@ -39,11 +56,19 @@ app.post('/login', async (req, res) => {
     if (error) {
         return res.status(401).json({ error: error.message });
     }
+
     const userId = data.user?.id;
     let role = null;
     if (userId) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single();
-        role = profile?.role || null;
+        // Buscamos el rol en la tabla de clientes
+        const { data: client } = await supabase.from('clients').select('role').eq('id', userId).single();
+        if (client) {
+            role = client.role;
+        } else {
+            // Si no es cliente, buscamos en la tabla de restaurantes
+            const { data: restaurant } = await supabase.from('restaurants').select('role').eq('id', userId).single();
+            role = restaurant?.role || null;
+        }
     }
     res.json({ ...data, role });
 });
