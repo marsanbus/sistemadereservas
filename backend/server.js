@@ -124,6 +124,18 @@ app.put('/restaurants/:id', async (req, res) => {
         return res.status(400).json({ error: 'El número de mesas y la capacidad total deben ser mayores a 0.' });
     }
 
+    // Verificar si el restaurante existe
+    const { data: restaurante, error: fetchError } = await supabase
+        .from('restaurants')
+        .select('id')
+        .eq('id', id)
+        .single();
+
+    if (fetchError || !restaurante) {
+        return res.status(404).json({ error: 'Restaurante no encontrado.' });
+    }
+
+    // Actualizar los datos del restaurante
     const { error } = await supabase
         .from('restaurants')
         .update({ total_tables, total_capacity })
@@ -154,6 +166,19 @@ app.get('/my-restaurant', async (req, res) => {
 // Ruta para obtener las reservas de un restaurante
 app.get('/restaurants/:id/reservations', async (req, res) => {
     const { id } = req.params;
+
+    // Verificar si el restaurante existe
+    const { data: restaurante, error: fetchError } = await supabase
+        .from('restaurants')
+        .select('id')
+        .eq('id', id)
+        .single();
+
+    if (fetchError || !restaurante) {
+        return res.status(404).json({ error: 'Restaurante no encontrado.' });
+    }
+
+    // Obtener las reservas del restaurante para el turno actual
     const now = new Date().toISOString();
     const { data, error } = await supabase
         .from('reservations')
@@ -161,6 +186,7 @@ app.get('/restaurants/:id/reservations', async (req, res) => {
         .eq('restaurant_id', id)
         .gte('reservation_time', now)
         .order('reservation_time', { ascending: true });
+
     if (error) return res.status(400).json({ error: error.message });
     res.json(data);
 });

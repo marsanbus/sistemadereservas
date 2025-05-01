@@ -66,17 +66,26 @@ async function loadReservations() {
             'Authorization': `Bearer ${token}`
         }
     });
-    const reservations = await response.json();
+
     const list = document.getElementById('reservations-list');
     list.innerHTML = '';
+
+    // Manejo de errores en la solicitud
+    if (!response.ok) {
+        list.innerHTML = '<li class="list-group-item text-danger">Error cargando reservas</li>';
+        return;
+    }
+
+    const reservations = await response.json();
+
     if (reservations && reservations.length > 0) {
         reservations.forEach(r => {
             let acciones = '';
             if (r.status === 'pending') {
                 acciones = `
-                        <button class="btn btn-success btn-sm me-2" onclick="cambiarEstadoReserva('${r.id}', 'accepted')">Aceptar</button>
-                        <button class="btn btn-danger btn-sm" onclick="cambiarEstadoReserva('${r.id}', 'denied')">Denegar</button>
-                    `;
+                    <button class="btn btn-success btn-sm me-2" onclick="cambiarEstadoReserva('${r.id}', 'accepted')">Aceptar</button>
+                    <button class="btn btn-danger btn-sm" onclick="cambiarEstadoReserva('${r.id}', 'denied')">Denegar</button>
+                `;
             } else if (r.status === 'accepted') {
                 acciones = `<span class="badge bg-success">Aceptada</span>`;
             } else if (r.status === 'denied') {
@@ -85,12 +94,12 @@ async function loadReservations() {
                 acciones = `<span class="badge bg-secondary">Cancelada</span>`;
             }
             list.innerHTML += `<li class="list-group-item">
-                    <strong>${r.reservation_time.replace('T', ' ').substring(0, 16)}</strong> - ${r.number_of_guests} comensales<br>
-                    Nombre reserva: ${r.reservation_name || ''}<br>
-                    Teléfono: ${r.phone || ''}<br>
-                    Tarjeta: ${r.credit_card || ''}<br>
-                    Estado: ${acciones}
-                </li>`;
+                <strong>${r.reservation_time.replace('T', ' ').substring(0, 16)}</strong> - ${r.number_of_guests} comensales<br>
+                Nombre reserva: ${r.reservation_name || ''}<br>
+                Teléfono: ${r.phone || ''}<br>
+                Tarjeta: ${r.credit_card || ''}<br>
+                Estado: ${acciones}
+            </li>`;
         });
     } else {
         list.innerHTML = '<li class="list-group-item">No hay reservas futuras.</li>';

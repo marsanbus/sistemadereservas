@@ -14,6 +14,18 @@ window.registerRestaurant = async function() {
     const total_tables = parseInt(document.getElementById('restaurant-tables').value, 10);
     const total_capacity = parseInt(document.getElementById('restaurant-capacity').value, 10);
 
+    // Validación de campos vacíos
+    if (!email || !password || !name || !address || !city || !phone || isNaN(total_tables) || isNaN(total_capacity)) {
+        mostrarMensaje('Error', 'Todos los campos son obligatorios.');
+        return;
+    }
+
+    // Validación de valores numéricos
+    if (total_tables <= 0 || total_capacity <= 0) {
+        mostrarMensaje('Error', 'El número de mesas y la capacidad total deben ser mayores a 0.');
+        return;
+    }
+
     const response = await fetch('https://sistemadereservas-d1t5.onrender.com/register-restaurant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

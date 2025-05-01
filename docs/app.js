@@ -59,6 +59,12 @@ async function register() {
     const surname = document.getElementById('surname').value;
     const alias = document.getElementById('alias').value;
 
+    // Validación de campos vacíos
+    if (!email || !password || !name || !surname || !alias) {
+        mostrarMensaje('Error', 'Todos los campos son obligatorios.');
+        return;
+    }
+
     const response = await fetch('https://sistemadereservas-d1t5.onrender.com/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
