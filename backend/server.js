@@ -9,6 +9,23 @@ app.use(express.json());
 // Ruta para registrar un nuevo usuario
 app.post('/register', async (req, res) => {
     const { email, password, name, surname, alias } = req.body;
+
+    // Validación de campos obligatorios
+    if (!name || !surname || !alias || !email || !password) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+    }
+
+    // Validación del formato del correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'El correo electrónico no es válido.' });
+    }
+
+    // Validación de la longitud de la contraseña
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres.' });
+    }
+
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return res.status(400).json({ error: error.message });
 
@@ -29,6 +46,23 @@ app.post('/register', async (req, res) => {
 // Ruta para registrar un nuevo restaurante
 app.post('/register-restaurant', async (req, res) => {
     const { email, password, name, address, city, phone, total_tables, total_capacity } = req.body;
+
+    // Validación de campos obligatorios
+    if (!email || !password || !name || !address || !city || !phone || !total_tables || !total_capacity) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+    }
+
+    // Validación de valores numéricos
+    if (total_tables <= 0 || total_capacity <= 0) {
+        return res.status(400).json({ error: 'El número de mesas y la capacidad total deben ser mayores a 0.' });
+    }
+
+    // Validación del formato del correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'El correo electrónico no es válido.' });
+    }
+
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return res.status(400).json({ error: error.message });
 
@@ -84,10 +118,17 @@ app.get('/restaurants', async (req, res) => {
 app.put('/restaurants/:id', async (req, res) => {
     const { total_tables, total_capacity } = req.body;
     const { id } = req.params;
+
+    // Validación de valores
+    if (!total_tables || !total_capacity || total_tables <= 0 || total_capacity <= 0) {
+        return res.status(400).json({ error: 'El número de mesas y la capacidad total deben ser mayores a 0.' });
+    }
+
     const { error } = await supabase
         .from('restaurants')
         .update({ total_tables, total_capacity })
         .eq('id', id);
+
     if (error) return res.status(400).json({ error: error.message });
     res.json({ success: true });
 });
@@ -239,13 +280,31 @@ app.get('/my-reservations', async (req, res) => {
 app.put('/reservations/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
+
+    // Verificar el estado actual de la reserva
+    const { data: reserva, error: fetchError } = await supabase
+        .from('reservations')
+        .select('status')
+        .eq('id', id)
+        .single();
+
+    if (fetchError || !reserva) {
+        return res.status(404).json({ error: 'Reserva no encontrada.' });
+    }
+
+    if (reserva.status === 'cancelled') {
+        return res.status(400).json({ error: 'No se puede cambiar el estado de una reserva cancelada.' });
+    }
+
     if (!["accepted", "denied"].includes(status)) {
         return res.status(400).json({ error: 'Estado no permitido' });
     }
+
     const { error } = await supabase
         .from('reservations')
         .update({ status })
         .eq('id', id);
+
     if (error) return res.status(400).json({ error: error.message });
     res.json({ success: true });
 });
@@ -253,10 +312,28 @@ app.put('/reservations/:id/status', async (req, res) => {
 // Ruta para que un cliente pueda cancelar una reserva
 app.put('/reservations/:id/cancel', async (req, res) => {
     const { id } = req.params;
+
+    // Verificar el estado actual de la reserva
+    const { data: reserva, error: fetchError } = await supabase
+        .from('reservations')
+        .select('status')
+        .eq('id', id)
+        .single();
+
+    if (fetchError || !reserva) {
+        return res.status(404).json({ error: 'Reserva no encontrada.' });
+    }
+
+    if (reserva.status === 'cancelled') {
+        return res.status(400).json({ error: 'La reserva ya está cancelada.' });
+    }
+
+    // Actualizar el estado a "cancelled"
     const { error } = await supabase
         .from('reservations')
         .update({ status: 'cancelled' })
         .eq('id', id);
+
     if (error) return res.status(400).json({ error: error.message });
     res.json({ success: true });
 });

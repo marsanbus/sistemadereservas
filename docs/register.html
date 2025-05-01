@@ -14,10 +14,10 @@
             <h2 class="text-center mb-4">Registro de Cliente</h2>
             <form onsubmit="register(); return false;">
                 <input type="text" id="name" class="form-control mb-3" placeholder="Nombre" required>
-                <input type="text" id="surname" class="form-control mb-3" placeholder="Apellidos">
-                <input type="text" id="alias" class="form-control mb-3" placeholder="Alias">
+                <input type="text" id="surname" class="form-control mb-3" placeholder="Apellidos" required>
+                <input type="text" id="alias" class="form-control mb-3" placeholder="Alias" required>
                 <input type="email" id="email" class="form-control mb-3" placeholder="Correo electrónico" required>
-                <input type="password" id="password" class="form-control mb-3" placeholder="Contraseña" required>
+                <input type="password" id="password" class="form-control mb-3" placeholder="Contraseña" required minlength="8">
                 <button type="submit" class="btn btn-primary w-100 mb-2">Registrarse</button>
             </form>
             <div class="d-flex justify-content-between mt-2">

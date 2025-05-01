@@ -14,16 +14,15 @@
             <h2 class="card-title text-center mb-4">Registro de Restaurante</h2>
             <form id="form-registro-restaurante" onsubmit="registerRestaurant(); return false;">
                 <input type="email" id="email" class="form-control mb-3" placeholder="Correo electrónico" required>
-                <input type="password" id="password" class="form-control mb-3" placeholder="Contraseña" required>
-                <input type="text" id="restaurant-name" class="form-control mb-3" placeholder="Nombre del restaurante"
-                    required>
+                <input type="password" id="password" class="form-control mb-3" placeholder="Contraseña" required minlength="8">
+                <input type="text" id="restaurant-name" class="form-control mb-3" placeholder="Nombre del restaurante" required>
                 <input type="text" id="restaurant-address" class="form-control mb-3" placeholder="Dirección" required>
                 <input type="text" id="restaurant-city" class="form-control mb-3" placeholder="Ciudad" required>
                 <input type="text" id="restaurant-phone" class="form-control mb-3" placeholder="Teléfono" required>
-                <input type="number" id="restaurant-tables" class="form-control mb-3"
-                    placeholder="Número de mesas reservables" min="1" required>
-                <input type="number" id="restaurant-capacity" class="form-control mb-3"
-                    placeholder="Capacidad total de comensales" min="1" required>
+                <input type="number" id="restaurant-tables" class="form-control mb-3" placeholder="Número de mesas reservables" min="1" required>
+                <input type="number" id="restaurant-capacity" class="form-control mb-3" placeholder="Capacidad total de comensales" min="1" required>
+                <input type="number" id="total-tables" class="form-control mb-3" placeholder="Número de mesas" required min="1">
+                <input type="number" id="total-capacity" class="form-control mb-3" placeholder="Capacidad total" required min="1">
                 <button type="submit" class="btn btn-primary w-100 mb-2">Registrarse como Restaurante</button>
             </form>
             <div class="d-flex justify-content-between mt-2">

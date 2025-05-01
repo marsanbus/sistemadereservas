@@ -96,8 +96,8 @@ document.getElementById('form-reserva').addEventListener('submit', async functio
     const telefono = document.getElementById('reserva-telefono').value;
     const tarjeta = document.getElementById('reserva-tarjeta').value;
 
-    if (!dia || !hora || !minutos) {
-        mostrarMensaje('Error', 'Debes seleccionar fecha, hora y minutos.');
+    if (!nombreReserva || !dia || !hora || !minutos || !comensales || !telefono || !tarjeta) {
+        mostrarMensaje('Error', 'Por favor, completa todos los campos.');
         return;
     }
 

@@ -3,6 +3,12 @@ async function login() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
+    // Validación de campos vacíos
+    if (!email || !password) {
+        mostrarMensaje('Error', 'Todos los campos son obligatorios.');
+        return;
+    }
+
     const response = await fetch('https://sistemadereservas-d1t5.onrender.com/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
