@@ -9,13 +9,15 @@ async function loadPanel() {
         return;
     }
 
-    // Llamamos al backend para obtener el restaurante del usuario autenticado
+    // Función para obtener los datos del restaurante
     const response = await fetch('https://sistemadereservas-d1t5.onrender.com/my-restaurant', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
         }
     });
+
+    // Manejo de errores en la solicitud
     const result = await response.json();
     if (!response.ok || !result || !result.id) {
         mostrarMensaje('Error', 'No tienes restaurante asociado. Contacta con el administrador.');

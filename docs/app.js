@@ -82,6 +82,7 @@ async function register() {
     window.location.href = 'login.html';
 }
 
+// Función para mostrar mensajes en un modal
 function mostrarMensaje(titulo, mensaje) {
     document.getElementById('mensajeModalLabel').textContent = titulo || 'Mensaje';
     document.getElementById('mensajeModalBody').innerHTML = mensaje || '';

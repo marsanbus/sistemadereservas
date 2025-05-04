@@ -1,4 +1,4 @@
-// Solo permitimos el acceso a clientes
+// Solo permitimos el acceso a restaurantes
 if (localStorage.getItem('user_role') === 'restaurante') {
     window.location.href = 'panel_restaurante.html';
 }

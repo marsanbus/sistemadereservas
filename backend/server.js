@@ -52,7 +52,7 @@ app.post('/register-restaurant', async (req, res) => {
         return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
     }
 
-    // Validación de valores numéricos
+    // Validación de números positivos
     if (total_tables <= 0 || total_capacity <= 0) {
         return res.status(400).json({ error: 'El número de mesas y la capacidad total deben ser mayores a 0.' });
     }
@@ -124,7 +124,7 @@ app.put('/restaurants/:id', async (req, res) => {
         return res.status(400).json({ error: 'El número de mesas y la capacidad total deben ser mayores a 0.' });
     }
 
-    // Verificar si el restaurante existe
+    // Verificamos si el restaurante existe
     const { data: restaurante, error: fetchError } = await supabase
         .from('restaurants')
         .select('id')
@@ -135,7 +135,7 @@ app.put('/restaurants/:id', async (req, res) => {
         return res.status(404).json({ error: 'Restaurante no encontrado.' });
     }
 
-    // Actualizar los datos del restaurante
+    // Actualizamos los datos del restaurante
     const { error } = await supabase
         .from('restaurants')
         .update({ total_tables, total_capacity })
@@ -145,7 +145,7 @@ app.put('/restaurants/:id', async (req, res) => {
     res.json({ success: true });
 });
 
-// Ruta para obtener los datos del restaurante asociado al usuario autenticado (restaurante logueado)
+// Ruta para obtener los datos del restaurante logueado
 app.get('/my-restaurant', async (req, res) => {
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
@@ -167,7 +167,7 @@ app.get('/my-restaurant', async (req, res) => {
 app.get('/restaurants/:id/reservations', async (req, res) => {
     const { id } = req.params;
 
-    // Verificar si el restaurante existe
+    // Verificamos si el restaurante existe
     const { data: restaurante, error: fetchError } = await supabase
         .from('restaurants')
         .select('id')
@@ -178,7 +178,7 @@ app.get('/restaurants/:id/reservations', async (req, res) => {
         return res.status(404).json({ error: 'Restaurante no encontrado.' });
     }
 
-    // Obtener las reservas del restaurante para el turno actual
+    // Obtenemos las reservas del restaurante para el turno actual
     const now = new Date().toISOString();
     const { data, error } = await supabase
         .from('reservations')
@@ -307,7 +307,7 @@ app.put('/reservations/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Verificar el estado actual de la reserva
+    // Verificamos el estado actual de la reserva
     const { data: reserva, error: fetchError } = await supabase
         .from('reservations')
         .select('status')
@@ -339,7 +339,7 @@ app.put('/reservations/:id/status', async (req, res) => {
 app.put('/reservations/:id/cancel', async (req, res) => {
     const { id } = req.params;
 
-    // Verificar el estado actual de la reserva
+    // Verificamos el estado actual de la reserva
     const { data: reserva, error: fetchError } = await supabase
         .from('reservations')
         .select('status')
@@ -354,7 +354,7 @@ app.put('/reservations/:id/cancel', async (req, res) => {
         return res.status(400).json({ error: 'La reserva ya está cancelada.' });
     }
 
-    // Actualizar el estado a "cancelled"
+    // Actualizamos el estado a "cancelled"
     const { error } = await supabase
         .from('reservations')
         .update({ status: 'cancelled' })
