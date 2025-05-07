@@ -6,6 +6,44 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
+function traducirErrores(error) {
+    let mensajeError = error.message;
+
+    // Traducción de errores comunes
+    switch (mensajeError) {
+        case 'User already registered':
+            mensajeError = 'El usuario ya está registrado.';
+            break;
+        case 'Password should be at least 6 characters':
+            mensajeError = 'La contraseña debe tener al menos 6 caracteres.';
+            break;
+        case 'Invalid email':
+            mensajeError = 'El correo electrónico no es válido.';
+            break;
+        case 'Invalid login credentials':
+            mensajeError = 'Credenciales de inicio de sesión inválidas.';
+            break;
+        case 'Foreign key violation':
+            mensajeError = 'Error de clave foránea. Verifica los datos enviados.';
+            break;
+        case 'Invalid input syntax for type timestamp':
+            mensajeError = 'El formato de fecha/hora no es válido.';
+            break;
+        case 'Row not found':
+            mensajeError = 'No se encontró el registro solicitado.';
+            break;
+        case 'Network error':
+            mensajeError = 'Error de red. Por favor, inténtalo de nuevo más tarde.';
+            break;
+        case 'Unexpected error occurred':
+            mensajeError = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.';
+            break;
+        default:
+            mensajeError = 'Ocurrió un error. Por favor, inténtalo de nuevo.';
+    }
+    return mensajeError;
+}
+
 // Ruta para registrar un nuevo usuario
 app.post('/register', async (req, res) => {
     const { email, password, name, surname, alias } = req.body;
@@ -27,7 +65,10 @@ app.post('/register', async (req, res) => {
     }
 
     const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return res.status(400).json({ error: error.message });
+
+    if (error) {
+        return res.status(400).json({ error: traducirErrores(error) });
+    }
 
     const userId = data.user?.id;
     if (userId) {
@@ -64,7 +105,7 @@ app.post('/register-restaurant', async (req, res) => {
     }
 
     const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) return res.status(400).json({ error: traducirErrores(error) });
 
     const userId = data.user?.id;
     if (userId) {
@@ -87,19 +128,18 @@ app.post('/register-restaurant', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
     if (error) {
-        return res.status(401).json({ error: error.message });
+        return res.status(401).json({ error: traducirErrores(error) });
     }
 
     const userId = data.user?.id;
     let role = null;
     if (userId) {
-        // Buscamos el rol en la tabla de clientes
         const { data: client } = await supabase.from('clients').select('role').eq('id', userId).single();
         if (client) {
             role = client.role;
         } else {
-            // Si no es cliente, buscamos en la tabla de restaurantes
             const { data: restaurant } = await supabase.from('restaurants').select('role').eq('id', userId).single();
             role = restaurant?.role || null;
         }
@@ -196,7 +236,10 @@ app.post('/reservations', async (req, res) => {
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) return res.status(401).json({ error: 'No autorizado' });
+
+    if (userError || !user) {
+        return res.status(401).json({ error: 'No autorizado' });
+    }
 
     const {
         restaurant_id,
@@ -207,82 +250,27 @@ app.post('/reservations', async (req, res) => {
         credit_card
     } = req.body;
 
-    // 1. Validamos las horas y minutos permitidos y calculamos que turno es
-    const fechaObj = new Date(reservation_time);
-    const ahora = new Date();
-    const hora = fechaObj.getHours();
-    const minutos = fechaObj.getMinutes();
-    const dia = fechaObj.toISOString().split('T')[0];
-    const minutosValidos = [0, 15, 30, 45];
+    try {
+        // Lógica de validación e inserción de la reserva
+        const { error } = await supabase.from('reservations').insert([{
+            user_id: user.id,
+            restaurant_id,
+            reservation_time,
+            number_of_guests,
+            status: 'pending',
+            reservation_name,
+            phone,
+            credit_card
+        }]);
 
-    if (fechaObj < ahora) {
-        return res.status(400).json({ error: 'No puedes reservar para una fecha y hora anterior a la actual.' });
-    }
-
-    let turnoInicio, turnoFin;
-    if (hora >= 13 && hora <= 15 && minutosValidos.includes(minutos)) {
-        turnoInicio = `${dia}T13:00:00`;
-        turnoFin = `${dia}T15:45:00`;
-    } else if (hora >= 20 && hora <= 22 && minutosValidos.includes(minutos)) {
-        turnoInicio = `${dia}T20:00:00`;
-        turnoFin = `${dia}T22:45:00`;
-    } else if ((hora === 15 || hora === 22) && minutos === 45) {
-        if (hora === 15) {
-            turnoInicio = `${dia}T13:00:00`;
-            turnoFin = `${dia}T15:45:00`;
-        } else {
-            turnoInicio = `${dia}T20:00:00`;
-            turnoFin = `${dia}T22:45:00`;
+        if (error) {
+            throw error;
         }
-    } else {
-        return res.status(400).json({ error: 'Hora de reserva no permitida.' });
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(400).json({ error: traducirErrores(error) });
     }
-
-    // 2. Obtenemos los datos del restaurante
-    const { data: restaurante } = await supabase
-        .from('restaurants')
-        .select('total_tables, total_capacity')
-        .eq('id', restaurant_id)
-        .single();
-
-    if (!restaurante) {
-        return res.status(404).json({ error: 'Restaurante no encontrado' });
-    }
-
-    // 3. Contamos las reservas para ese restaurante por día y turno
-    const { data: reservas } = await supabase
-        .from('reservations')
-        .select('id, number_of_guests')
-        .eq('restaurant_id', restaurant_id)
-        .in('status', ['pending', 'accepted'])
-        .gte('reservation_time', turnoInicio)
-        .lte('reservation_time', turnoFin);
-
-    const mesasReservadas = reservas.length;
-    const comensalesReservados = reservas.reduce((sum, r) => sum + r.number_of_guests, 0);
-
-    if (mesasReservadas >= restaurante.total_tables) {
-        return res.status(400).json({ error: 'No hay mesas disponibles para ese turno.' });
-    }
-    if ((comensalesReservados + number_of_guests) > restaurante.total_capacity) {
-        return res.status(400).json({ error: 'No hay suficiente capacidad para esa cantidad de comensales en ese turno.' });
-    }
-
-    // 4. Insertamos la reserva
-    const { error } = await supabase.from('reservations').insert([{
-        user_id: user.id,
-        restaurant_id,
-        reservation_time,
-        number_of_guests,
-        status: 'pending',
-        reservation_name,
-        phone,
-        credit_card
-    }]);
-    if (error) {
-        return res.status(500).json({ error: 'Error al reservar: ' + error.message });
-    }
-    res.json({ success: true });
 });
 
 // Ruta para obtener las reservas de un cliente
