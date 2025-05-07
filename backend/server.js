@@ -64,6 +64,32 @@ app.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres.' });
     }
 
+    const { data: clienteExistente } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+    const { data: restauranteExistente } = await supabase
+        .from('restaurants')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+    const { data: aliasExistente } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('alias', alias)
+        .single();
+
+    if (clienteExistente || restauranteExistente) {
+        return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+    }
+
+    if (aliasExistente) {
+        return res.status(400).json({ error: 'El alias ya está en uso. Por favor, elige otro.' });
+    }
+
     const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
@@ -102,6 +128,28 @@ app.post('/register-restaurant', async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         return res.status(400).json({ error: 'El correo electrónico no es válido.' });
+    }
+
+    // Validación del número de teléfono
+    const telefonoRegex = /^[0-9]{9,15}$/;
+    if (!telefonoRegex.test(phone)) {
+        return res.status(400).json({ error: 'El número de teléfono no es válido.' });
+    }
+
+    const { data: clienteExistente } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+    const { data: restauranteExistente } = await supabase
+        .from('restaurants')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+    if (clienteExistente || restauranteExistente) {
+        return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
     }
 
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -251,7 +299,39 @@ app.post('/reservations', async (req, res) => {
     } = req.body;
 
     try {
-        // Lógica de validación e inserción de la reserva
+        // Verificamos si el restaurante existe y obtenemos su capacidad
+        const { data: restaurante, error: restauranteError } = await supabase
+            .from('restaurants')
+            .select('total_capacity')
+            .eq('id', restaurant_id)
+            .single();
+
+        if (restauranteError || !restaurante) {
+            return res.status(404).json({ error: 'Restaurante no encontrado.' });
+        }
+
+        // Validamos si la capacidad es suficiente
+        if (number_of_guests > restaurante.total_capacity) {
+            return res.status(400).json({ error: 'No hay suficiente capacidad para esa cantidad de comensales.' });
+        }
+
+        // Verificamos si hay mesas disponibles para el turno solicitado
+        const { data: reservasExistentes, error: reservasError } = await supabase
+            .from('reservations')
+            .select('id, number_of_guests')
+            .eq('restaurant_id', restaurant_id)
+            .eq('reservation_time', reservation_time);
+
+        if (reservasError) {
+            return res.status(400).json({ error: 'Error al verificar la disponibilidad de mesas.' });
+        }
+
+        const totalComensalesReservados = reservasExistentes.reduce((total, r) => total + r.number_of_guests, 0);
+        if (totalComensalesReservados + number_of_guests > restaurante.total_capacity) {
+            return res.status(400).json({ error: 'No hay suficiente capacidad para ese turno.' });
+        }
+
+        // Insertamos la reserva
         const { error } = await supabase.from('reservations').insert([{
             user_id: user.id,
             restaurant_id,
@@ -328,14 +408,18 @@ app.put('/reservations/:id/cancel', async (req, res) => {
     const { id } = req.params;
 
     // Verificamos el estado actual de la reserva
-    const { data: reserva, error: fetchError } = await supabase
+    const { data: reserva, error: reservaError } = await supabase
         .from('reservations')
-        .select('status')
+        .select('user_id')
         .eq('id', id)
         .single();
 
-    if (fetchError || !reserva) {
+    if (reservaError || !reserva) {
         return res.status(404).json({ error: 'Reserva no encontrada.' });
+    }
+
+    if (reserva.user_id !== user.id) {
+        return res.status(403).json({ error: 'Solo el cliente que creó la reserva puede cancelarla.' });
     }
 
     if (reserva.status === 'cancelled') {
