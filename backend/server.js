@@ -418,10 +418,6 @@ app.put('/reservations/:id/cancel', async (req, res) => {
         return res.status(404).json({ error: 'Reserva no encontrada.' });
     }
 
-    if (reserva.user_id !== user.id) {
-        return res.status(403).json({ error: 'Solo el cliente que creó la reserva puede cancelarla.' });
-    }
-
     if (reserva.status === 'cancelled') {
         return res.status(400).json({ error: 'La reserva ya está cancelada.' });
     }
