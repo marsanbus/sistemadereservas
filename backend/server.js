@@ -318,9 +318,10 @@ app.post('/reservations', async (req, res) => {
         // Verificamos si hay mesas disponibles para el turno solicitado
         const { data: reservasExistentes, error: reservasError } = await supabase
             .from('reservations')
-            .select('id, number_of_guests')
+            .select('id, number_of_guests, status')
             .eq('restaurant_id', restaurant_id)
-            .eq('reservation_time', reservation_time);
+            .eq('reservation_time', reservation_time)
+            .in('status', ['pending', 'accepted']);
 
         if (reservasError) {
             return res.status(400).json({ error: 'Error al verificar la disponibilidad de mesas.' });
